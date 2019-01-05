@@ -1,0 +1,4 @@
+Django==2.1.4
+djangorestframework==3.9.0
+numpy==1.14.0
+virtualenv==16.2.0
