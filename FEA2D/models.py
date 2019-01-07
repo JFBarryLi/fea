@@ -3,21 +3,21 @@ import time, random
 
 START_TIME = int(time.time()*1000)
 
+def gen_id():
+	'''
+	Generate unique primary key
+	'''
+
+	t = int(time.time()*1000) - START_TIME
+	u = random.SystemRandom().getrandbits(23)
+	id = (t << 23 ) | u
+
+	return id
+
 class InputStructure(models.Model):
 	'''
 	Input structure
 	'''
-	
-	def gen_id():
-		'''
-		Generate unique id
-		'''
-
-		t = int(time.time()*1000) - START_TIME
-		u = random.SystemRandom().getrandbits(23)
-		id = (t << 23 ) | u
-
-		return id
 	
 	id = models.BigIntegerField(default = gen_id, primary_key=True)  
 	created = models.DateTimeField(auto_now_add=True)
@@ -31,8 +31,6 @@ class InputStructure(models.Model):
 	boundary_conditions = models.TextField()
 	frame_or_truss = models.CharField(max_length=5)
 	
-
-	
 	class Meta:
 		ordering = ('created',)
 		
@@ -41,24 +39,24 @@ class OutputStructure(models.Model):
 	Output structure
 	'''
 	
-	def gen_id():
-		'''
-		Generate unique id
-		'''
-
-		t = int(time.time()*1000) - START_TIME
-		u = random.SystemRandom().getrandbits(23)
-		id = (t << 23 ) | u
-
-		return id	
-	
 	id = models.BigIntegerField(default = gen_id, primary_key=True)  
 	created = models.DateTimeField(auto_now_add=True)
 	nodal_coordinates = models.TextField()
 	factor_of_safety = models.DecimalField(max_digits=10, decimal_places=2)
 
-
-	
 	class Meta:
 		ordering = ('created',)
+		
+# class InputOutputLink(models.Model):
+	# '''
+	# Link between InputStructure and OutputStructure
+	# '''
+	
+	# id = models.BigIntegerField(default = gen_id, primary_key=True)  
+	# created = models.DateTimeField(auto_now_add=True)
+	# input_id = models.BigIntegerField()
+	# output_id = models.BigIntegerField()
+
+	# class Meta:
+		# ordering = ('created',)
 		
