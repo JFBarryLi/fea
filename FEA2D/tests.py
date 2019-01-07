@@ -6,7 +6,7 @@ from .views import FEA2D_input, FEA2D_output
 
 from rest_framework.test import APIRequestFactory
 
-from .fea import node, element
+from .fea import node, element, frame
 
 import numpy as np
 	
@@ -90,7 +90,15 @@ class InputStructureSerializerTests(TestCase):
 		
 		serializer = InputStructureSerializer(struc)
 		
-		self.assertEqual(serializer.data, {'ip_address': '999.999.999.999', 'outer_diameter': '99.99', 'inner_diameter': '99.99', 'modulus_elasticity': '99.99', 'yield_strength': '99.99', 'connectivity_table': 'testct', 'nodal_coordinates': 'testnc', 'boundary_conditions': 'testbc', 'frame_or_truss': 'tesft'})
+		self.assertEqual(serializer.data, {'ip_address': '999.999.999.999', \
+										   'outer_diameter': '99.99', \
+										   'inner_diameter': '99.99', \
+										   'modulus_elasticity': '99.99', \
+										   'yield_strength': '99.99', \
+										   'connectivity_table': 'testct', \
+										   'nodal_coordinates': 'testnc', \
+										   'boundary_conditions': 'testbc', \
+										   'frame_or_truss': 'tesft'})
 	
 class OutputStructureSerializerTests(TestCase):		
 	def test_serializer_with_normal_data(self):
@@ -236,4 +244,224 @@ class FEA2DElementTests(TestCase):
 										  
 		self.assertEqual(equal, True)
 
-# class FEA2DFrameTests(TestCase):
+class FEA2DFrameTests(TestCase):
+	def test_fea_frame_creation(self):
+		'''
+		Test the creation of the frame object
+		'''
+		outer_diameter = 10
+		inner_diameter = 5
+		modulus_elasticity = 10
+		yield_strength = 100
+		connectivity_table = {1 : [1, 2], 2 : [2, 3]}
+		nodal_coordinates = {1 : [0,0], 2 : [0,1], 3 : [10,10]}
+		boundary_conditions = [1,2,3]
+		force_vector = {1 : [10, 10, 10], 2 : [20, 20, 30]}
+		frame_or_truss = 'frame'
+		
+		test_frame = frame(outer_diameter, inner_diameter, modulus_elasticity,
+						   yield_strength, connectivity_table, nodal_coordinates,
+						   boundary_conditions, force_vector, frame_or_truss)
+						   
+		self.assertEqual(test_frame.outer_diameter, 10)
+		self.assertEqual(test_frame.inner_diameter, 5)
+		self.assertEqual(test_frame.modulus_elasticity, 10)
+		self.assertEqual(test_frame.yield_strength, 100)
+		self.assertEqual(test_frame.connectivity_table, {1 : [1, 2], 2 : [2, 3]})
+		self.assertEqual(test_frame.nodal_coordinates, {1 : [0,0], 2 : [0,1], 3 : [10,10]})
+		self.assertEqual(test_frame.boundary_conditions, [1,2,3])
+		self.assertEqual(test_frame.force_vector, {1 : [10, 10, 10], 2 : [20, 20, 30]})
+		self.assertEqual(test_frame.frame_or_truss, 'frame')
+		
+	def test_fea_frame_node_creation(self):
+		'''
+		Test the creation of nodes from the nodal_coordinates
+0		'''
+		outer_diameter = 10
+		inner_diameter = 5
+		modulus_elasticity = 10
+		yield_strength = 100
+		connectivity_table = {1 : [1, 2], 2 : [2, 3]}
+		nodal_coordinates = {1 : [0,0], 2 : [0,1], 3 : [10,10]}
+		boundary_conditions = [1,2,3]
+		force_vector = {1 : [10, 10, 10], 2 : [20, 20, 30]}
+		frame_or_truss = 'frame'
+		
+		test_frame = frame(outer_diameter, inner_diameter, modulus_elasticity,
+						   yield_strength, connectivity_table, nodal_coordinates,
+						   boundary_conditions, force_vector, frame_or_truss)
+		
+		test_frame.create_nodes()
+		
+		self.assertEqual([test_frame.nodes[2].id,test_frame.nodes[2].x,test_frame.nodes[2].y], [2,0,1])
+		
+	def test_fea_frame_element_creation(self):
+		'''
+		Test the creation of elements from the connectivity_table
+		'''
+		outer_diameter = 10
+		inner_diameter = 5
+		modulus_elasticity = 10
+		yield_strength = 100
+		connectivity_table = {1 : [1, 2], 2 : [2, 3]}
+		nodal_coordinates = {1 : [0,0], 2 : [0,1], 3 : [10,10]}
+		boundary_conditions = [1,2,3]
+		force_vector = {1 : [10, 10, 10], 2 : [20, 20, 30]}
+		frame_or_truss = 'frame'
+		
+		test_frame = frame(outer_diameter, inner_diameter, modulus_elasticity,
+						   yield_strength, connectivity_table, nodal_coordinates,
+						   boundary_conditions, force_vector, frame_or_truss)
+		
+		test_frame.create_nodes()
+		test_frame.create_elements()
+		
+		self.assertEqual([test_frame.elements[2].nodei.x, test_frame.elements[2].nodei.y], [0, 1])
+		
+	def test_fea_frame_element_calc_properties(self):
+		'''
+		Test the calc_properties method of each element
+		'''
+		outer_diameter = 10
+		inner_diameter = 5
+		modulus_elasticity = 10
+		yield_strength = 100
+		connectivity_table = {1 : [1, 2], 2 : [2, 3]}
+		nodal_coordinates = {1 : [0,0], 2 : [0,1], 3 : [10,10]}
+		boundary_conditions = [1,2,3]
+		force_vector = {1 : [10, 10, 10], 2 : [20, 20, 30]}
+		frame_or_truss = 'frame'
+		
+		test_frame = frame(outer_diameter, inner_diameter, modulus_elasticity,
+						   yield_strength, connectivity_table, nodal_coordinates,
+						   boundary_conditions, force_vector, frame_or_truss)
+		
+		test_frame.create_nodes()
+		test_frame.create_elements()
+		test_frame.calc_properties()
+		
+		self.assertEqual(test_frame.elements[1].L, 1)
+		self.assertEqual(test_frame.elements[1].Cx, 0)
+		self.assertEqual(test_frame.elements[1].Cy, 1)
+		self.assertEqual(np.round(test_frame.elements[1].I, 2), 460.19)
+		self.assertEqual(np.round(test_frame.elements[1].A, 2), 58.90)
+		
+	def test_fea_frame_element_calc_stiffness(self):
+		'''
+		Test the calc_properties method of each element
+		'''
+		outer_diameter = 10
+		inner_diameter = 5
+		modulus_elasticity = 1
+		yield_strength = 100
+		connectivity_table = {1 : [1, 2], 2 : [2, 3]}
+		nodal_coordinates = {1 : [0,0], 2 : [0,1], 3 : [10,10]}
+		boundary_conditions = [1,2,3]
+		force_vector = {1 : [10, 10, 10], 2 : [20, 20, 30]}
+		frame_or_truss = 'frame'
+		
+		test_frame = frame(outer_diameter, inner_diameter, modulus_elasticity,
+						   yield_strength, connectivity_table, nodal_coordinates,
+						   boundary_conditions, force_vector, frame_or_truss)
+		
+		test_frame.create_nodes()
+		test_frame.create_elements()
+		test_frame.calc_properties()
+		test_frame.elements[1].A = 1
+		test_frame.elements[1].I = 1
+		test_frame.calc_stiffness()
+		
+		equal = (test_frame.elements[1].K == np.matrix([[12., 0., 6., -12., 0., 6.],
+													    [0., 1., 0., 0., -1., 0.],
+													    [6., 0., 4., -6., 0., 2.],
+													    [-12., 0., -6., 12., 0., -6.],
+													    [0., -1., 0., 0., 1., 0.],
+													    [6., 0., 2., -6., 0., 4.]])).all()
+
+		self.assertEqual(equal, True)
+		
+	def test_fea_frame_element_calc_assemblage_frame(self):
+		'''
+		Test the calc_assemblage method for frame
+		'''
+		outer_diameter = 10
+		inner_diameter = 5
+		modulus_elasticity = 1
+		yield_strength = 100
+		connectivity_table = {1 : [1, 2], 2 : [2, 3]}
+		nodal_coordinates = {1 : [0,0], 2 : [0,1], 3 : [10,10]}
+		boundary_conditions = [1,2,3]
+		force_vector = {1 : [10, 10, 10], 2 : [20, 20, 30]}
+		frame_or_truss = 'frame'
+		
+		test_frame = frame(outer_diameter, inner_diameter, modulus_elasticity,
+						   yield_strength, connectivity_table, nodal_coordinates,
+						   boundary_conditions, force_vector, frame_or_truss)
+		
+		test_frame.create_nodes()
+		test_frame.create_elements()
+		test_frame.calc_properties()
+		test_frame.elements[1].A = 1
+		test_frame.elements[1].I = 1
+		test_frame.calc_stiffness()
+		test_frame.elements[2].K = np.matrix([[12., 0., 6., -12., 0., 6.],
+											  [0., 1., 0., 0., -1., 0.],
+											  [6., 0., 4., -6., 0., 2.],
+											  [-12., 0., -6., 12., 0., -6.],
+											  [0., -1., 0., 0., 1., 0.],
+											  [6., 0., 2., -6., 0., 4.]])
+		test_frame.calc_assemblage()
+		
+		equal = (test_frame.assemblage == np.matrix([[12., 0., 6., -12., 0., 6., 0., 0., 0.],
+													 [0., 1., 0., 0., -1., 0., 0., 0., 0.],
+													 [6., 0., 4., -6., 0., 2., 0., 0., 0.],
+													 [-12., 0., -6., 24., 0., 0., -12., 0., 6.],
+													 [0., -1., 0., 0., 2., 0., 0., -1., 0.],
+													 [6., 0., 2., 0., 0., 8., -6., 0., 2.],
+													 [0., 0., 0., -12., 0., -6., 12., 0., -6.],
+													 [0., 0., 0., 0., -1., 0., 0., 1., 0.],
+													 [0., 0., 0., 6., 0., 2., -6., 0., 4.]])).all()
+
+		self.assertEqual(equal, True)
+		
+	def test_fea_frame_element_calc_assemblage_truss(self):
+		'''
+		Test the calc_assemblage method for truss
+		'''
+		outer_diameter = 10
+		inner_diameter = 5
+		modulus_elasticity = 1
+		yield_strength = 100
+		connectivity_table = {1 : [1, 2], 2 : [2, 3]}
+		nodal_coordinates = {1 : [0,0], 2 : [0,1], 3 : [10,10]}
+		boundary_conditions = [1,2,3]
+		force_vector = {1 : [10, 10, 10], 2 : [20, 20, 30]}
+		frame_or_truss = 'truss'
+		
+		test_frame = frame(outer_diameter, inner_diameter, modulus_elasticity,
+						   yield_strength, connectivity_table, nodal_coordinates,
+						   boundary_conditions, force_vector, frame_or_truss)
+		
+		test_frame.create_nodes()
+		test_frame.create_elements()
+
+		test_frame.elements[1].K = np.matrix([[1., 1., 1., 1.],
+											  [1., 1., 1., 1.],
+											  [1., 1., 1., 1.],
+											  [1., 1., 1., 1.]])
+
+		test_frame.elements[2].K = np.matrix([[1., 1., 1., 1.],
+											  [1., 1., 1., 1.],
+											  [1., 1., 1., 1.],
+											  [1., 1., 1., 1.]])
+		test_frame.calc_assemblage()
+		
+		equal = (test_frame.assemblage == np.matrix([[1., 1., 1., 1., 0., 0.],
+													 [1., 1., 1., 1., 0., 0.],
+													 [1., 1., 2., 2., 1., 1.],
+													 [1., 1., 2., 2., 1., 1.],
+													 [0., 0., 1., 1., 1., 1.],
+													 [0., 0., 1., 1., 1., 1.]])).all()
+
+		self.assertEqual(equal, True)
+
