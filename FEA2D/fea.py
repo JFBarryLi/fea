@@ -19,11 +19,11 @@ class frame():
 	nodal_coordinates : dict
 		Dictionary representing the coordinates of each node {node_id1 : [x1, y1],...}
 	boundary_conditions : array
-		Array representing the boundary conditions [1,15,22,...]
+		Array representing the boundary conditions [0,15,22,...]
 		Each node has 3 degrees of freedom, the array determines which DOF are fixed
 		1 correspond to node_1 x-direction, 2 correspond to node_1 y-direction, 3 correspond to node_1 theta, 4 correspond to node_1 x-direction ...
-	force_vector : Dictionary
-		Dictionary representing the input force into the structure {node_id : [fx, fy, Mz], ...}
+	force_vector : array
+		Array representing the input force into the structure [fx1, fy1, theta1, ...]
 	frame_or_truss : char 
 		'frame' or 'truss', determine how the assemblage matrix is calculated
 	'''
@@ -107,41 +107,72 @@ class frame():
 			nodei_id = ele.nodei.id
 			nodej_id = ele.nodej.id
 			
-			# Quadrant 1 for frame; row:[ix,iy,itheta] col:[ix,iy,itheta]
-			# Quadrant 1 for truss; row:[ix,iy] col:[ix,iy]
+			# Quadrant 1 
+			# for frame; row:[ix,iy,itheta] col:[ix,iy,itheta]
+			# for truss; row:[ix,iy] col:[ix,iy]
 			for j in range(0,DOF):
 				for k in range(0,DOF):
 					self.assemblage[DOF*nodei_id - DOF + j, DOF*nodei_id - DOF + k] = \
 					self.assemblage[DOF*nodei_id - DOF + j, DOF*nodei_id - DOF + k] + \
 					ele.K[j,k]
 
-			# Quadrant 2 for frame; row:[ix,iy,itheta] col:[jx,jy,jz,jtheta]
-			# Quadrant 2 for truss; row:[ix,iy,itheta] col:[jx,jy,jz,jtheta]
+			# Quadrant 2 
+			# for frame; row:[ix,iy,itheta] col:[jx,jy,jz,jtheta]
+			# for truss; row:[ix,iy,itheta] col:[jx,jy,jz,jtheta]
 			for j in range(0,DOF):
 				for k in range(0,DOF):
 					self.assemblage[DOF*nodei_id - DOF + j, DOF*nodej_id - DOF + k] = \
 					self.assemblage[DOF*nodei_id - DOF + j, DOF*nodej_id - DOF + k] + \
 					ele.K[j,k+DOF]
 
-			# Quadrant 3 for frame; row:[jx,jy,jz,itheta] col:[ix,iy,jtheta]
-			# Quadrant 3 for truss; row:[jx,jy,jz,itheta] col:[ix,iy,jtheta]
+			# Quadrant 3 
+			# for frame; row:[jx,jy,jz,itheta] col:[ix,iy,jtheta]
+			# for truss; row:[jx,jy,jz,itheta] col:[ix,iy,jtheta]
 			for j in range(0,DOF):
 				for k in range(0,DOF):
 					self.assemblage[DOF*nodej_id - DOF + j, DOF*nodei_id - DOF + k] = \
 					self.assemblage[DOF*nodej_id - DOF + j, DOF*nodei_id - DOF + k] + \
 					ele.K[j+DOF,k]
 					
-			# Quadrant 4 for frame; row:[jx,jy,jz,itheta] col:[jx,jy,jz,jtheta]
-			# Quadrant 4 for truss; row:[jx,jy,jz,itheta] col:[jx,jy,jz,jtheta]
+			# Quadrant 4 
+			# for frame; row:[jx,jy,jz,itheta] col:[jx,jy,jz,jtheta]
+			# for truss; row:[jx,jy,jz,itheta] col:[jx,jy,jz,jtheta]
 			for j in range(0,DOF):
 				for k in range(0,DOF):
 					self.assemblage[DOF*nodej_id - DOF + j, DOF*nodej_id - DOF + k] = \
 					self.assemblage[DOF*nodej_id - DOF + j, DOF*nodej_id - DOF + k] + \
 					ele.K[j+DOF,k+DOF]
 						
-			
+	def calc_displacement(self):
+		'''
+		Calculate the displacement vector for each element
+		'''
+		if self.frame_or_truss == 'frame':
+			# Degrees of freedom per node
+			DOF = 3
+		elif self.frame_or_truss == 'truss':
+			DOF = 2
 		
-
+		size = len(self.nodes) * DOF
+		
+		# Remove degree of freedom corresponding to the boundary_conditions
+		force_bc_removed = np.delete(self.force_vector, self.boundary_conditions, axis=0)
+		force_bc_removed = np.matrix(force_bc_removed).transpose()
+		assemblage_bc_removed = np.delete(self.assemblage, self.boundary_conditions, axis=0)
+		assemblage_bc_removed = np.delete(assemblage_bc_removed, self.boundary_conditions, axis=1)
+			
+		# Displacement = Assemblage Matrix divided by Force vector
+		self.Q = np.linalg.inv(assemblage_bc_removed) * force_bc_removed
+		
+		# Insert zero rows into the displacement vector at the locaiton of the boundary conditions
+		total_dof_index = np.linspace(0, size - 1, num = size, dtype = int)
+		dof_index_without_bc = np.setdiff1d(total_dof_index, self.boundary_conditions)
+		zero_Q = np.zeros([size,1])
+		
+		for i in range(0,len(self.Q)):
+			zero_Q[dof_index_without_bc[i]] = self.Q[i] 
+		
+		self.Q = zero_Q
 		
 class element():
 	'''

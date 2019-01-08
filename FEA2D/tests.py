@@ -256,7 +256,7 @@ class FEA2DFrameTests(TestCase):
 		connectivity_table = {1 : [1, 2], 2 : [2, 3]}
 		nodal_coordinates = {1 : [0,0], 2 : [0,1], 3 : [10,10]}
 		boundary_conditions = [1,2,3]
-		force_vector = {1 : [10, 10, 10], 2 : [20, 20, 30]}
+		force_vector = [0, 0, 0, 0, -1, 0]
 		frame_or_truss = 'frame'
 		
 		test_frame = frame(outer_diameter, inner_diameter, modulus_elasticity,
@@ -270,7 +270,7 @@ class FEA2DFrameTests(TestCase):
 		self.assertEqual(test_frame.connectivity_table, {1 : [1, 2], 2 : [2, 3]})
 		self.assertEqual(test_frame.nodal_coordinates, {1 : [0,0], 2 : [0,1], 3 : [10,10]})
 		self.assertEqual(test_frame.boundary_conditions, [1,2,3])
-		self.assertEqual(test_frame.force_vector, {1 : [10, 10, 10], 2 : [20, 20, 30]})
+		self.assertEqual(test_frame.force_vector, [0, 0, 0, 0, -1, 0])
 		self.assertEqual(test_frame.frame_or_truss, 'frame')
 		
 	def test_fea_frame_node_creation(self):
@@ -284,7 +284,7 @@ class FEA2DFrameTests(TestCase):
 		connectivity_table = {1 : [1, 2], 2 : [2, 3]}
 		nodal_coordinates = {1 : [0,0], 2 : [0,1], 3 : [10,10]}
 		boundary_conditions = [1,2,3]
-		force_vector = {1 : [10, 10, 10], 2 : [20, 20, 30]}
+		force_vector = [0, 0, 0, 0, -1, 0]
 		frame_or_truss = 'frame'
 		
 		test_frame = frame(outer_diameter, inner_diameter, modulus_elasticity,
@@ -306,7 +306,7 @@ class FEA2DFrameTests(TestCase):
 		connectivity_table = {1 : [1, 2], 2 : [2, 3]}
 		nodal_coordinates = {1 : [0,0], 2 : [0,1], 3 : [10,10]}
 		boundary_conditions = [1,2,3]
-		force_vector = {1 : [10, 10, 10], 2 : [20, 20, 30]}
+		force_vector = [0, 0, 0, 0, -1, 0]
 		frame_or_truss = 'frame'
 		
 		test_frame = frame(outer_diameter, inner_diameter, modulus_elasticity,
@@ -329,7 +329,7 @@ class FEA2DFrameTests(TestCase):
 		connectivity_table = {1 : [1, 2], 2 : [2, 3]}
 		nodal_coordinates = {1 : [0,0], 2 : [0,1], 3 : [10,10]}
 		boundary_conditions = [1,2,3]
-		force_vector = {1 : [10, 10, 10], 2 : [20, 20, 30]}
+		force_vector = [0, 0, 0, 0, -1, 0]
 		frame_or_truss = 'frame'
 		
 		test_frame = frame(outer_diameter, inner_diameter, modulus_elasticity,
@@ -357,7 +357,7 @@ class FEA2DFrameTests(TestCase):
 		connectivity_table = {1 : [1, 2], 2 : [2, 3]}
 		nodal_coordinates = {1 : [0,0], 2 : [0,1], 3 : [10,10]}
 		boundary_conditions = [1,2,3]
-		force_vector = {1 : [10, 10, 10], 2 : [20, 20, 30]}
+		force_vector = [0, 0, 0, 0, -1, 0]
 		frame_or_truss = 'frame'
 		
 		test_frame = frame(outer_diameter, inner_diameter, modulus_elasticity,
@@ -391,7 +391,7 @@ class FEA2DFrameTests(TestCase):
 		connectivity_table = {1 : [1, 2], 2 : [2, 3]}
 		nodal_coordinates = {1 : [0,0], 2 : [0,1], 3 : [10,10]}
 		boundary_conditions = [1,2,3]
-		force_vector = {1 : [10, 10, 10], 2 : [20, 20, 30]}
+		force_vector = [0, 0, 0, 0, -1, 0]
 		frame_or_truss = 'frame'
 		
 		test_frame = frame(outer_diameter, inner_diameter, modulus_elasticity,
@@ -435,7 +435,7 @@ class FEA2DFrameTests(TestCase):
 		connectivity_table = {1 : [1, 2], 2 : [2, 3]}
 		nodal_coordinates = {1 : [0,0], 2 : [0,1], 3 : [10,10]}
 		boundary_conditions = [1,2,3]
-		force_vector = {1 : [10, 10, 10], 2 : [20, 20, 30]}
+		force_vector = [0, 0, 0, 0, -1, 0]
 		frame_or_truss = 'truss'
 		
 		test_frame = frame(outer_diameter, inner_diameter, modulus_elasticity,
@@ -465,3 +465,33 @@ class FEA2DFrameTests(TestCase):
 
 		self.assertEqual(equal, True)
 
+	def test_fea_frame_calc_displacement_frame(self):
+		'''
+		Test the calc_displacement method for frame
+		'''
+		outer_diameter = 10
+		inner_diameter = 5
+		modulus_elasticity = 10
+		yield_strength = 100
+		connectivity_table = {1 : [1, 2]}
+		nodal_coordinates = {1 : [0,0], 2 : [0,1]}
+		boundary_conditions = [0,1,2]
+		force_vector = [0, 0, 0, 0, -1, 0]
+		frame_or_truss = 'frame'
+		
+		test_frame = frame(outer_diameter, inner_diameter, modulus_elasticity,
+						   yield_strength, connectivity_table, nodal_coordinates,
+						   boundary_conditions, force_vector, frame_or_truss)
+		
+		test_frame.create_nodes()
+		test_frame.create_elements()
+		test_frame.calc_properties()
+		test_frame.calc_stiffness()
+		test_frame.calc_assemblage()
+		test_frame.calc_displacement()
+		
+		equal = (test_frame.Q.round(8) == np.matrix([[0,0,0,0,-0.00169765,0]]).transpose()).all()
+
+		self.assertEqual(equal, True)
+		self.assertEqual(len(test_frame.Q), 6)
+		
