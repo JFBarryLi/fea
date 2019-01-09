@@ -43,6 +43,7 @@ class frame():
 		self.frame_or_truss = frame_or_truss
 		self.nodes = {}
 		self.elements = {}
+		self.stress = {}
 	
 	def create_nodes(self):
 		'''
@@ -199,7 +200,28 @@ class frame():
 		
 		
 	def calc_stress(self):
-		print('1')
+		'''
+		Calculate stress in each member
+		'''
+	
+		if self.frame_or_truss == 'frame':
+			print('1')
+		elif self.frame_or_truss == 'truss':
+			for i in range(1, int(len(self.elements) + 1)):
+				
+				ele = self.elements[i]
+				# Displacements in Global Coordinates
+				qxi = self.Q[ele.nodei.id * 2 - 2]
+				qyi = self.Q[ele.nodei.id * 2 - 1]
+				qxj = self.Q[ele.nodej.id * 2 - 2]
+				qyj = self.Q[ele.nodej.id * 2 - 1]
+				
+				# Displacements in Local Coordinates
+			
+				qi_local = qxi * ele.Cx + qyi * ele.Cy
+				qj_local = qxj * ele.Cx + qyj * ele.Cy
+				self.stress[i] = self.modulus_elasticity * (qj_local - qi_local) / self.elements[i].L
+	
 		
 	def calc_factor_of_safety(self):
 		print('1')

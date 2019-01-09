@@ -517,3 +517,32 @@ class FEA2DFrameTests(TestCase):
 		test_frame.calc_new_nodal_coordinates()
 		
 		self.assertEqual(test_frame.new_nodal_coordinates, {1 : [1,1], 2 : [1,2], 3 : [2,3], 4 : [5,6], 5 : [11, 11]})
+		
+	def test_fea_frame_calc_stress_truss(self):
+		'''
+		Test the calc_stress method for truss
+		'''
+		outer_diameter = 10
+		inner_diameter = 0
+		modulus_elasticity = 10
+		yield_strength = 100
+		connectivity_table = {1 : [1, 2]}
+		nodal_coordinates = {1 : [0,0], 2 : [0,1]}
+		boundary_conditions = [0,1,2]
+		force_vector = [ 0, 0, 0, -1]
+		frame_or_truss = 'truss'
+		
+		test_frame = frame(outer_diameter, inner_diameter, modulus_elasticity,
+						   yield_strength, connectivity_table, nodal_coordinates,
+						   boundary_conditions, force_vector, frame_or_truss)
+						   
+		test_frame.create_nodes()
+		test_frame.create_elements()
+		test_frame.calc_properties()
+		test_frame.calc_stiffness()
+		test_frame.calc_assemblage()
+		test_frame.calc_displacement()
+		test_frame.calc_stress()
+		
+		self.assertEqual(round(test_frame.stress[1][0],4), -0.0127)
+		
