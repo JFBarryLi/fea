@@ -173,7 +173,39 @@ class frame():
 			zero_Q[dof_index_without_bc[i]] = self.Q[i] 
 		
 		self.Q = zero_Q
+
+	def calc_new_nodal_coordinates(self):
+		'''
+		Calculate the new nodal coordinates after the force vector is applied
+		'''
 		
+		# Convert nodal coordinate dictionary to a list
+		nodal_coordinates_list = []
+		for key in sorted(self.nodal_coordinates.keys()):
+			nodal_coordinates_list.append(self.nodal_coordinates[key][0])
+			nodal_coordinates_list.append(self.nodal_coordinates[key][1])
+			
+		# Deleting every third row, the row that correspond with the rotating DOF
+		if self.frame_or_truss == 'frame':
+			disp_without_moment = np.delete(self.Q, self.Q[1::3]).transpose()
+		
+		for i in range(0, len(nodal_coordinates_list)):
+			nodal_coordinates_list[i] = nodal_coordinates_list[i] + disp_without_moment[i] 
+
+		# Constructing the new_nodal_coordinates dictionary
+		self.new_nodal_coordinates = {}
+		for i in range(1, int(len(nodal_coordinates_list)/2+1)):
+			self.new_nodal_coordinates[i] = [nodal_coordinates_list[2*i-2], nodal_coordinates_list[2*i-1]]
+		
+		
+	def calc_stress(self):
+		print('1')
+		
+	def calc_factor_of_safety(self):
+		print('1')
+		
+
+	
 class element():
 	'''
 	Element class, represent a bar element with circular/tubular cross section

@@ -495,3 +495,25 @@ class FEA2DFrameTests(TestCase):
 		self.assertEqual(equal, True)
 		self.assertEqual(len(test_frame.Q), 6)
 		
+	def test_fea_frame_calc_new_nodal_coordinates(self):
+		'''
+		Test the calc_new_nodal_coordinates method
+		'''
+		outer_diameter = 10
+		inner_diameter = 5
+		modulus_elasticity = 10
+		yield_strength = 100
+		connectivity_table = {1 : [1, 2], 2 : [2, 3], 3 : [3, 4], 4 : [4, 5]}
+		nodal_coordinates = {1 : [0,0], 2 : [0,1], 3 : [1,2], 4 : [4,5], 5 : [10, 10]}
+		boundary_conditions = [0,1,2]
+		force_vector = [0, 0, 0, 0, -1, 0]
+		frame_or_truss = 'frame'
+		
+		test_frame = frame(outer_diameter, inner_diameter, modulus_elasticity,
+						   yield_strength, connectivity_table, nodal_coordinates,
+						   boundary_conditions, force_vector, frame_or_truss)
+		
+		test_frame.Q = np.matrix([1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]).transpose()
+		test_frame.calc_new_nodal_coordinates()
+		
+		self.assertEqual(test_frame.new_nodal_coordinates, {1 : [1,1], 2 : [1,2], 3 : [2,3], 4 : [5,6], 5 : [11, 11]})
