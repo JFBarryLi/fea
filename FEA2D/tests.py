@@ -518,7 +518,7 @@ class FEA2DTrussTests(TestCase):
 		yield_strength = 100
 		connectivity_table = {1 : [1, 2]}
 		nodal_coordinates = {1 : [0,0], 2 : [0,1]}
-		boundary_conditions = [0,1,2]
+		boundary_conditions = [0,1]
 		force_vector = [ 0, 0, 0, -1]
 		
 		test_truss = truss(outer_diameter, inner_diameter, modulus_elasticity,

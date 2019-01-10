@@ -243,20 +243,30 @@ class structure(ABC):
 		
 		DOF = self.DOF
 		
-		size = len(self.nodes) * DOF
+		size = len(self.nodes) * DOF	
+		
+		zero_force_rows = []
+		# Remove rows cooresponding to force=0
+		for i in range(0, len(self.force_vector)):
+			if self.force_vector[i] == 0:
+				zero_force_rows.append(i)	
+		
+		# Add zero_force_rows to boundary condition indices
+		bc = self.boundary_conditions + zero_force_rows
+		bc = list(set(bc))
 		
 		# Remove degree of freedom corresponding to the boundary_conditions
-		force_bc_removed = np.delete(self.force_vector, self.boundary_conditions, axis=0)
+		force_bc_removed = np.delete(self.force_vector, bc, axis=0)
 		force_bc_removed = np.matrix(force_bc_removed).transpose()
-		assemblage_bc_removed = np.delete(self.assemblage, self.boundary_conditions, axis=0)
-		assemblage_bc_removed = np.delete(assemblage_bc_removed, self.boundary_conditions, axis=1)
-			
+		assemblage_bc_removed = np.delete(self.assemblage, bc, axis=0)
+		assemblage_bc_removed = np.delete(assemblage_bc_removed, bc, axis=1)
+		
 		# Displacement = Assemblage Matrix divided by Force vector
 		self.Q = np.linalg.inv(assemblage_bc_removed) * force_bc_removed
 		
 		# Insert zero rows into the displacement vector at the locaiton of the boundary conditions
 		total_dof_index = np.linspace(0, size - 1, num = size, dtype = int)
-		dof_index_without_bc = np.setdiff1d(total_dof_index, self.boundary_conditions)
+		dof_index_without_bc = np.setdiff1d(total_dof_index, bc)
 		zero_Q = np.zeros([size,1])
 		
 		for i in range(0,len(self.Q)):
@@ -270,10 +280,6 @@ class structure(ABC):
 		
 	@abstractmethod
 	def calc_stress(self):
-		pass
-		
-	@abstractmethod
-	def calc_factor_of_safety(self):
 		pass
 
 class frame(structure):
@@ -320,10 +326,49 @@ class frame(structure):
 		Calculate stress in each member
 		'''
 	
-		print('1')
+		for i in range(1, int(len(self.elements) + 1)):
+			
+			ele = self.elements[i]
+			# Displacements in Global Coordinates
+			qix = self.Q[ele.nodei.id * 3 - 3]
+			qiy = self.Q[ele.nodei.id * 3 - 2]
+			qjx = self.Q[ele.nodej.id * 3 - 3]
+			qjy = self.Q[ele.nodej.id * 3 - 2]
+			
+			
+			# Displacements in Local Coordinates
+			qix_local = qix * ele.Cx + qiy * ele.Cy
+			qjx_local = qjx * ele.Cx + qjy * ele.Cy
+			
+			qiy_local = qix * -ele.Cy + qiy * ele.Cx
+			qjy_local = qjx * -ele.Cy + qjy * ele.Cx
+			qi_theta = self.Q[ele.nodei.id * 3 - 1]
+			qj_theta = self.Q[ele.nodej.id * 3 - 1]
+			
+			# Axial stress
+			axial_stress = self.modulus_elasticity * (qjx_local - qix_local) / ele.L
 		
-	def calc_factor_of_safety(self):
-		print('1')
+			# Bending stress
+			bending_stress_i = self.modulus_elasticity * self.OD/2 * ((6/ele.L*(qiy_local-qjy_local))+(2/ele.L*(2*qi_theta+qj_theta)))
+			bending_stress_j = self.modulus_elasticity * self.OD/2 * ((6/ele.L*(qiy_local-qjy_local))+(2/ele.L*(2*qj_theta+qi_theta)))
+			bending_stress = np.max([bending_stress_i, bending_stress_j])
+			
+			# Shear stress
+			shear_stress = self.modulus_elasticity * ele.I * ((12/ele.L**3)*(qiy_local-qjy_local)+(6/ele.L**2)*(qi_theta+qj_theta))
+			
+			# Principal stress
+			principal_stress_1 = (axial_stress + bending_stress)/2 + np.sqrt(((axial_stress-bending_stress)/2)**2+shear_stress**2)
+			principal_stress_2 = (axial_stress + bending_stress)/2 - np.sqrt(((axial_stress-bending_stress)/2)**2+shear_stress**2)
+			max_stress = np.max([principal_stress_1, principal_stress_2])
+			min_stress = np.min([principal_stress_1, principal_stress_2])
+			
+			# Von Mises stress
+			von_mises_stress = np.sqrt(max_stress**2-max_stress*min_stress+min_stress**2)
+			
+			self.stress[i] = von_mises_stress
+	
+		pass
+
 	
 class truss(structure):
 	'''
@@ -370,19 +415,14 @@ class truss(structure):
 			
 			ele = self.elements[i]
 			# Displacements in Global Coordinates
-			qxi = self.Q[ele.nodei.id * 2 - 2]
-			qyi = self.Q[ele.nodei.id * 2 - 1]
-			qxj = self.Q[ele.nodej.id * 2 - 2]
-			qyj = self.Q[ele.nodej.id * 2 - 1]
+			qix = self.Q[ele.nodei.id * 2 - 2]
+			qiy = self.Q[ele.nodei.id * 2 - 1]
+			qjx = self.Q[ele.nodej.id * 2 - 2]
+			qjy = self.Q[ele.nodej.id * 2 - 1]
 			
 			# Displacements in Local Coordinates
-		
-			qi_local = qxi * ele.Cx + qyi * ele.Cy
-			qj_local = qxj * ele.Cx + qyj * ele.Cy
-			self.stress[i] = self.modulus_elasticity * (qj_local - qi_local) / self.elements[i].L
+			qi_local = qix * ele.Cx + qiy * ele.Cy
+			qj_local = qjx * ele.Cx + qjy * ele.Cy
+			self.stress[i] = self.modulus_elasticity * (qj_local - qi_local) / ele.L
 	
-		
-	def calc_factor_of_safety(self):
-		print('1')
-		
 
