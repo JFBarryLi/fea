@@ -59,19 +59,20 @@ class OutputStructureModelTests(TestCase):
 		'''
 		Check that OutputStructure objects are created properly
 		'''
-		struc = OutputStructure(nodal_coordinates='test123', factor_of_safety=99.99)
+		struc = OutputStructure(nodal_coordinates='test123', stress='test123')
 		
 		self.assertEqual(struc.nodal_coordinates, 'test123')
-		self.assertEqual(struc.factor_of_safety, 99.99)
+		self.assertEqual(struc.stress, 'test123)
 	
 	def test_object_save(self):
 		'''
 		Check OutputStructure are saved properly
 		'''
-		struc = OutputStructure(nodal_coordinates='test123', factor_of_safety=99.99)
+		struc = OutputStructure(nodal_coordinates='test123', stress='test123')
 		struc.save()
 		
 		self.assertEqual(OutputStructure.objects.order_by('created')[0].nodal_coordinates, 'test123')
+		self.assertEqual(OutputStructure.objects.order_by('created')[0].stress, 'test123')
 		
 class InputStructureSerializerTests(TestCase):
 	def test_serializer_with_normal_data(self):
@@ -105,11 +106,11 @@ class OutputStructureSerializerTests(TestCase):
 		'''
 		Check serializer output with normal data
 		'''
-		struc = OutputStructure(nodal_coordinates='test123', factor_of_safety=99.99)
+		struc = OutputStructure(nodal_coordinates='test123', stress='test123')
 		
 		serializer = OutputStructureSerializer(struc)
 		
-		self.assertEqual(serializer.data, {'nodal_coordinates': 'test123', 'factor_of_safety': '99.99'})
+		self.assertEqual(serializer.data, {'nodal_coordinates': 'test123', 'stress': 'test123'})
 			
 class FEA2DInputViewTests(TestCase):		
 	def test_Json_input_object(self):
@@ -563,7 +564,76 @@ class FEA2DTrussTests(TestCase):
 		self.assertEqual(round(test_truss.stress[1][0],4), -0.0127)
 
 class FEA2DFeaTests(TestCase):
-	def test_fea_fea_analyze(self):
+	def test_fea_fea_data_validate_diameter_error(self):
+		'''
+		Test the data_validate method; diameter error
+		'''
+		
+		outer_diameter = 10
+		inner_diameter = 20
+		modulus_elasticity = 10
+		yield_strength = 100
+		connectivity_table = {1 : [1, 2]}
+		nodal_coordinates = {1 : [0,0], 2 : [0,1]}
+		boundary_conditions = [0,1]
+		force_vector = [ 0, 0, 0, 0, -1, 0]
+		frame_or_truss = 'frame'
+		
+		test_fea = fea(outer_diameter, inner_diameter, modulus_elasticity,
+					   yield_strength, connectivity_table, nodal_coordinates,
+					   boundary_conditions, force_vector, frame_or_truss)
+					   
+		
+
+		self.assertEqual(test_fea.analyze(), "ERROR: inner diameter greater or equal to outer diameter")
+		
+	def test_fea_fea_data_validate_force_error(self):
+		'''
+		Test the data_validate method; force vector error
+		'''
+		
+		outer_diameter = 30
+		inner_diameter = 20
+		modulus_elasticity = 10
+		yield_strength = 100
+		connectivity_table = {1 : [1, 2]}
+		nodal_coordinates = {1 : [0,0], 2 : [0,1]}
+		boundary_conditions = [0,1]
+		force_vector = [0, 0, 0, -1, 0]
+		frame_or_truss = 'frame'
+		
+		test_fea = fea(outer_diameter, inner_diameter, modulus_elasticity,
+					   yield_strength, connectivity_table, nodal_coordinates,
+					   boundary_conditions, force_vector, frame_or_truss)
+					   
+		
+
+		self.assertEqual(test_fea.analyze(), "ERROR: size of force vector too small, require 3*(# of nodes)")
+	
+	def test_fea_fea_analyze_frame(self):
+		'''
+		Test the analyze method for the fea class
+		'''
+		
+		outer_diameter = 10
+		inner_diameter = 0
+		modulus_elasticity = 10
+		yield_strength = 100
+		connectivity_table = {1 : [1, 2]}
+		nodal_coordinates = {1 : [0,0], 2 : [0,1]}
+		boundary_conditions = [0,1]
+		force_vector = [ 0, 0, 0, 0, -1, 0]
+		frame_or_truss = 'frame'
+		
+		test_fea = fea(outer_diameter, inner_diameter, modulus_elasticity,
+					   yield_strength, connectivity_table, nodal_coordinates,
+					   boundary_conditions, force_vector, frame_or_truss)
+					   
+		test_fea.analyze()
+
+		self.assertEqual(round(test_fea.struc.stress[1][0],4), 0.0127)
+		
+	def test_fea_fea_analyze_truss(self):
 		'''
 		Test the analyze method for the fea class
 		'''
@@ -576,12 +646,12 @@ class FEA2DFeaTests(TestCase):
 		nodal_coordinates = {1 : [0,0], 2 : [0,1]}
 		boundary_conditions = [0,1]
 		force_vector = [ 0, 0, 0, -1]
-		frame_or_truss = 'frame'
+		frame_or_truss = 'truss'
 		
 		test_fea = fea(outer_diameter, inner_diameter, modulus_elasticity,
 					   yield_strength, connectivity_table, nodal_coordinates,
 					   boundary_conditions, force_vector, frame_or_truss)
 					   
 		test_fea.analyze()
-
-		self.assertEqual(round(fea.struc.stress[1][0],4), -0.0127)
+		
+		self.assertEqual(round(test_fea.struc.stress[1][0],4), -0.0127)

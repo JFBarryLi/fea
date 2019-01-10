@@ -349,8 +349,8 @@ class frame(structure):
 			axial_stress = self.modulus_elasticity * (qjx_local - qix_local) / ele.L
 		
 			# Bending stress
-			bending_stress_i = self.modulus_elasticity * self.OD/2 * ((6/ele.L*(qiy_local-qjy_local))+(2/ele.L*(2*qi_theta+qj_theta)))
-			bending_stress_j = self.modulus_elasticity * self.OD/2 * ((6/ele.L*(qiy_local-qjy_local))+(2/ele.L*(2*qj_theta+qi_theta)))
+			bending_stress_i = self.modulus_elasticity * self.outer_diameter/2 * ((6/ele.L*(qiy_local-qjy_local))+(2/ele.L*(2*qi_theta+qj_theta)))
+			bending_stress_j = self.modulus_elasticity * self.outer_diameter/2 * ((6/ele.L*(qiy_local-qjy_local))+(2/ele.L*(2*qj_theta+qi_theta)))
 			bending_stress = np.max([bending_stress_i, bending_stress_j])
 			
 			# Shear stress
@@ -365,7 +365,7 @@ class frame(structure):
 			# Von Mises stress
 			von_mises_stress = np.sqrt(max_stress**2-max_stress*min_stress+min_stress**2)
 			
-			self.stress[i] = von_mises_stress
+			self.stress[i] = [von_mises_stress]
 	
 		pass
 
@@ -462,7 +462,33 @@ class fea():
 		self.force_vector = force_vector
 		self.frame_or_truss = frame_or_truss
 	
+	def data_validate(self):
+		'''
+		Validate the input data and return common errors
+		'''
+	
+		if self.inner_diameter >= self.outer_diameter:
+			return "ERROR: inner diameter greater or equal to outer diameter"
+		elif self.frame_or_truss != 'frame' and self.frame_or_truss != 'truss':
+			return "ERROR: must specify either frame or truss"
+		elif len(self.boundary_conditions) > len(self.nodal_coordinates)*2 and self.frame_or_truss == 'truss':
+			return "ERROR: too many boundary conditions, maximum: 2*(# of nodes)"
+		elif len(self.boundary_conditions) > len(self.nodal_coordinates)*3 and self.frame_or_truss == 'frame':
+			return "ERROR: too many boundary conditions, maximum: 3*(# of nodes)"
+		elif len(self.force_vector) < len(self.nodal_coordinates)*2 and self.frame_or_truss == 'truss':
+			return "ERROR: size of force vector vector too small, require 2*(# of nodes)"
+		elif len(self.force_vector) < len(self.nodal_coordinates)*3 and self.frame_or_truss == 'frame':
+			return "ERROR: size of force vector too small, require 3*(# of nodes)"
+		else:
+			return True
+	
 	def analyze(self):
+		'''
+		Call all relevant methods to calculate stress
+		'''
+		
+		if self.data_validate() != True:
+			return self.data_validate()
 		
 		if self.frame_or_truss == 'frame':
 			self.struc = frame(self.outer_diameter, self.inner_diameter, self.modulus_elasticity,
@@ -481,3 +507,5 @@ class fea():
 		self.struc.calc_displacement()
 		self.struc.calc_new_nodal_coordinates
 		self.struc.calc_stress()
+		
+		return 'success'

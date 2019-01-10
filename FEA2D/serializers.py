@@ -13,4 +13,4 @@ class InputStructureSerializer(serializers.ModelSerializer):
 class OutputStructureSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = OutputStructure
-		fields = ('nodal_coordinates', 'factor_of_safety')
+		fields = ('nodal_coordinates', 'stress')

@@ -42,21 +42,21 @@ class OutputStructure(models.Model):
 	id = models.BigIntegerField(default = gen_id, primary_key=True)  
 	created = models.DateTimeField(auto_now_add=True)
 	nodal_coordinates = models.TextField()
-	factor_of_safety = models.DecimalField(max_digits=10, decimal_places=2)
+	stress = models.TextField()
 
 	class Meta:
 		ordering = ('created',)
 		
-# class InputOutputLink(models.Model):
-	# '''
-	# Link between InputStructure and OutputStructure
-	# '''
+class InputOutputLink(models.Model):
+	'''
+	Link between InputStructure and OutputStructure
+	'''
 	
-	# id = models.BigIntegerField(default = gen_id, primary_key=True)  
-	# created = models.DateTimeField(auto_now_add=True)
-	# input_id = models.BigIntegerField()
-	# output_id = models.BigIntegerField()
+	id = models.BigIntegerField(default = gen_id, primary_key=True)  
+	created = models.DateTimeField(auto_now_add=True)
+	input_id = models.BigIntegerField()
+	output_id = models.BigIntegerField()
 
-	# class Meta:
-		# ordering = ('created',)
+	class Meta:
+		ordering = ('created',)
 		
