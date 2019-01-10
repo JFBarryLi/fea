@@ -144,6 +144,7 @@ class structure(ABC):
 		self.nodes = {}
 		self.elements = {}
 		self.stress = {}
+		self.new_nodal_coordinates = {}
 	
 	def create_nodes(self):
 		'''
@@ -317,7 +318,6 @@ class frame(structure):
 			nodal_coordinates_list[i] = nodal_coordinates_list[i] + disp_without_moment[i] 
 
 		# Constructing the new_nodal_coordinates dictionary
-		self.new_nodal_coordinates = {}
 		for i in range(1, int(len(nodal_coordinates_list)/2+1)):
 			self.new_nodal_coordinates[i] = [nodal_coordinates_list[2*i-2], nodal_coordinates_list[2*i-1]]
 		
@@ -402,7 +402,6 @@ class truss(structure):
 			nodal_coordinates_list[i] = nodal_coordinates_list[i] + disp_without_moment[i] 
 
 		# Constructing the new_nodal_coordinates dictionary
-		self.new_nodal_coordinates = {}
 		for i in range(1, int(len(nodal_coordinates_list)/2+1)):
 			self.new_nodal_coordinates[i] = [nodal_coordinates_list[2*i-2], nodal_coordinates_list[2*i-1]]
 	
@@ -425,4 +424,60 @@ class truss(structure):
 			qj_local = qjx * ele.Cx + qjy * ele.Cy
 			self.stress[i] = self.modulus_elasticity * (qj_local - qi_local) / ele.L
 	
-
+class fea():
+	'''
+	FEA class, perform fea analysis on the structure
+	
+	Parameters
+	----------
+	outer_diameter : float [mm]
+	inner_diameter : float [mm]
+	modulus_elasticity : float [MPa]
+	yield_strength : float [MPa]
+	connectivity_table : dict
+		Dictionary representing the 2 nodes associated with each element {element_id : [nodei_id, nodej_id],...}
+	nodal_coordinates : dict
+		Dictionary representing the coordinates of each node {node_id1 : [x1, y1],...}
+	boundary_conditions : array
+		Array representing the boundary conditions [0,15,22,...]
+		Each node has 3 degrees of freedom, the array determines which DOF are fixed
+		1 correspond to node_1 x-direction, 2 correspond to node_1 y-direction, 3 correspond to node_1 theta, 4 correspond to node_1 x-direction ...
+	force_vector : array
+		Array representing the input force into the structure [fx1, fy1, theta1, ...]
+	frame_or_truss : char
+		Specify which type of structure to create
+	'''
+	
+	def __init__(self, outer_diameter, inner_diameter, modulus_elasticity,
+				 yield_strength, connectivity_table, nodal_coordinates,
+				 boundary_conditions, force_vector, frame_or_truss):
+				 
+		self.outer_diameter = outer_diameter
+		self.inner_diameter = inner_diameter
+		self.modulus_elasticity = modulus_elasticity
+		self.yield_strength = yield_strength
+		self.connectivity_table = connectivity_table
+		self.nodal_coordinates = nodal_coordinates
+		self.boundary_conditions = boundary_conditions
+		self.force_vector = force_vector
+		self.frame_or_truss = frame_or_truss
+	
+	def analyze(self):
+		
+		if self.frame_or_truss == 'frame':
+			self.struc = frame(self.outer_diameter, self.inner_diameter, self.modulus_elasticity,
+							   self.yield_strength, self.connectivity_table, self.nodal_coordinates,
+							   self.boundary_conditions, self.force_vector)
+		elif self.frame_or_truss == 'truss':
+			self.struc = truss(self.outer_diameter, self.inner_diameter, self.modulus_elasticity,
+							   self.yield_strength, self.connectivity_table, self.nodal_coordinates,
+							   self.boundary_conditions, self.force_vector)
+							   
+		self.struc.create_nodes()
+		self.struc.create_elements()
+		self.struc.calc_properties()
+		self.struc.calc_stiffness()
+		self.struc.calc_assemblage()
+		self.struc.calc_displacement()
+		self.struc.calc_new_nodal_coordinates
+		self.struc.calc_stress()

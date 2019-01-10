@@ -6,7 +6,7 @@ from .views import FEA2D_input, FEA2D_output
 
 from rest_framework.test import APIRequestFactory
 
-from .fea import node, element, structure, frame, truss
+from .fea import node, element, structure, frame, truss, fea
 
 import numpy as np
 	
@@ -466,6 +466,33 @@ class FEA2DFrameTests(TestCase):
 		test_frame.calc_new_nodal_coordinates()
 		
 		self.assertEqual(test_frame.new_nodal_coordinates, {1 : [1,1], 2 : [1,2], 3 : [2,3], 4 : [5,6], 5 : [11, 11]})
+		
+	def test_fea_frame_calc_stress(self):
+		'''
+		Test the calc_stress method for frame
+		'''
+		outer_diameter = 10
+		inner_diameter = 0
+		modulus_elasticity = 10
+		yield_strength = 100
+		connectivity_table = {1 : [1, 2]}
+		nodal_coordinates = {1 : [0,0], 2 : [0,1]}
+		boundary_conditions = [0,1]
+		force_vector = [ 0, 0, 0, -1]
+		
+		test_truss = truss(outer_diameter, inner_diameter, modulus_elasticity,
+						   yield_strength, connectivity_table, nodal_coordinates,
+						   boundary_conditions, force_vector)
+						   
+		test_truss.create_nodes()
+		test_truss.create_elements()
+		test_truss.calc_properties()
+		test_truss.calc_stiffness()
+		test_truss.calc_assemblage()
+		test_truss.calc_displacement()
+		test_truss.calc_stress()
+		
+		self.assertEqual(round(test_truss.stress[1][0],4), -0.0127)
 
 class FEA2DTrussTests(TestCase):
 	def test_fea_truss_calc_assemblage(self):
@@ -534,4 +561,27 @@ class FEA2DTrussTests(TestCase):
 		test_truss.calc_stress()
 		
 		self.assertEqual(round(test_truss.stress[1][0],4), -0.0127)
+
+class FEA2DFeaTests(TestCase):
+	def test_fea_fea_analyze(self):
+		'''
+		Test the analyze method for the fea class
+		'''
 		
+		outer_diameter = 10
+		inner_diameter = 0
+		modulus_elasticity = 10
+		yield_strength = 100
+		connectivity_table = {1 : [1, 2]}
+		nodal_coordinates = {1 : [0,0], 2 : [0,1]}
+		boundary_conditions = [0,1]
+		force_vector = [ 0, 0, 0, -1]
+		frame_or_truss = 'frame'
+		
+		test_fea = fea(outer_diameter, inner_diameter, modulus_elasticity,
+					   yield_strength, connectivity_table, nodal_coordinates,
+					   boundary_conditions, force_vector, frame_or_truss)
+					   
+		test_fea.analyze()
+
+		self.assertEqual(round(fea.struc.stress[1][0],4), -0.0127)
