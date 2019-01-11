@@ -2,7 +2,7 @@ from django.test import TestCase
 
 from .models import InputStructure, OutputStructure, InputOutputLink
 from .serializers import InputStructureSerializer, OutputStructureSerializer
-from .views import FEA2D_input, FEA2D_output
+from .views import fea2d_input, fea2d_output
 
 from rest_framework.test import APIRequestFactory
 
@@ -16,17 +16,15 @@ class InputStructureModelTests(TestCase):
 		'''
 		Check that InputStructure objects are created and saved properly
 		'''
-		struc = InputStructure(ip_address='999.999.999.999', 
-								outer_diameter=99.99,
-								inner_diameter=99.99,
-								modulus_elasticity=99.99,
-								yield_strength=99.99,
-								connectivity_table='testct',
-								nodal_coordinates='testnc',
-								boundary_conditions='testbc',
-								frame_or_truss='tesft')
+		struc = InputStructure(outer_diameter=99.99,
+							   inner_diameter=99.99,
+							   modulus_elasticity=99.99,
+							   yield_strength=99.99,
+							   connectivity_table='testct',
+							   nodal_coordinates='testnc',
+							   boundary_conditions='testbc',
+							   frame_or_truss='tesft')
 		
-		self.assertEqual(struc.ip_address, '999.999.999.999')
 		self.assertEqual(struc.outer_diameter, 99.99)
 		self.assertEqual(struc.inner_diameter, 99.99)
 		self.assertEqual(struc.modulus_elasticity, 99.99)
@@ -40,15 +38,14 @@ class InputStructureModelTests(TestCase):
 		'''
 		Check InputStructure are saved properly
 		'''
-		struc = InputStructure(ip_address='999.999.999.999', 
-								outer_diameter=99.99,
-								inner_diameter=99.99,
-								modulus_elasticity=99.99,
-								yield_strength=99.99,
-								connectivity_table='testct',
-								nodal_coordinates='testnc',
-								boundary_conditions='testbc',
-								frame_or_truss='tesft')
+		struc = InputStructure(outer_diameter=99.99,
+							   inner_diameter=99.99,
+							   modulus_elasticity=99.99,
+							   yield_strength=99.99,
+							   connectivity_table='testct',
+							   nodal_coordinates='testnc',
+							   boundary_conditions='testbc',
+							   frame_or_truss='tesft')
 		struc.save()
 		
 		self.assertEqual(InputStructure.objects.order_by('created')[0].nodal_coordinates, 'testnc')
@@ -90,21 +87,19 @@ class InputStructureSerializerTests(TestCase):
 		'''
 		Check serializer output with normal data
 		'''
-		struc = InputStructure(ip_address='999.999.999.999', 
-								outer_diameter=99.99,
-								inner_diameter=99.99,
-								modulus_elasticity=99.99,
-								yield_strength=99.99,
-								connectivity_table='testct',
-								nodal_coordinates='testnc',
-								boundary_conditions='testbc',
-								force_vector='testfv',
-								frame_or_truss='tesft')
+		struc = InputStructure(outer_diameter=99.99,
+							   inner_diameter=99.99,
+							   modulus_elasticity=99.99,
+							   yield_strength=99.99,
+							   connectivity_table='testct',
+							   nodal_coordinates='testnc',
+							   boundary_conditions='testbc',
+							   force_vector='testfv',
+							   frame_or_truss='tesft')
 		
 		serializer = InputStructureSerializer(struc)
 		
-		self.assertEqual(serializer.data, {'ip_address': '999.999.999.999', \
-										   'outer_diameter': 99.99, \
+		self.assertEqual(serializer.data, {'outer_diameter': 99.99, \
 										   'inner_diameter': 99.99, \
 										   'modulus_elasticity': 99.99, \
 										   'yield_strength': 99.99, \
@@ -134,7 +129,6 @@ class FEA2DInputViewTests(TestCase):
 		factory = APIRequestFactory()
 		
 		data = {
-			"ip_address":"999.999.999.999", 
 			"outer_diameter":"20",
 			"inner_diameter":"10",
 			"modulus_elasticity":"100",
@@ -146,7 +140,7 @@ class FEA2DInputViewTests(TestCase):
 			"frame_or_truss":"frame"
 		}
 		request = factory.post('input/',data, format='json')
-		view = FEA2D_input
+		view = fea2d_input
 		response = view(request)
 		
 		self.assertEqual(response.status_code, 201)
@@ -164,7 +158,7 @@ class FEA2DOutputViewTests(TestCase):
 		
 		factory = APIRequestFactory()
 		request = factory.get(url)
-		view = FEA2D_output
+		view = fea2d_output
 		response = view(request, id)
 		
 		self.assertEqual(response.status_code, 200)

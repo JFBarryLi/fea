@@ -21,7 +21,6 @@ class InputStructure(models.Model):
 	
 	id = models.BigIntegerField(default = gen_id, primary_key=True)  
 	created = models.DateTimeField(auto_now_add=True)
-	ip_address = models.CharField(max_length=50)
 	outer_diameter = models.FloatField()
 	inner_diameter = models.FloatField()
 	modulus_elasticity = models.FloatField()
