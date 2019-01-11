@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from .fea import node, element, structure, frame, truss, fea
 
 @api_view(['POST'])
-def FEA2D_input(request):
+def fea2d_input(request):
 	'''
 	Create a InputStructure, perform FEA2D and return an OutputStructure
 	'''
@@ -37,12 +37,13 @@ def FEA2D_input(request):
 			
 			# Save InputStructure.id and OutputStructure.id
 			io_link = InputOutputLink(input_id=instance.id, output_id=output_struc.id)
+			io_link.save()
 			
 			return Response(output_struc.id, status=status.HTTP_201_CREATED)
 		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
-def FEA2D_output(request, output_structure_id):
+def fea2d_output(request, output_structure_id):
 	'''
 	Retrieve OutputStructure corresponding to the InputStructure
 	'''
