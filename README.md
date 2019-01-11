@@ -30,29 +30,29 @@ Content payload example:
 ```
 
 Parameters:
-  * outer_diameter : float [mm]
-  * inner_diameter : float [mm]
-  * modulus_elasticity : float [MPa]
-  * yield_strength : float [MPa]
-  * connectivity_table : dict 
-	Dictionary representing the 2 nodes associated with each element {element_id : [nodei_id, nodej_id],...}
-  * nodal_coordinates : dict
-	Dictionary representing the coordinates of each node {node_id1 : [x1, y1],...}
-  * boundary_conditions : list
-	List representing the boundary conditions [0,15,22,...]
-	For frame aach node has 3 degree of freedom, the array determines which DOF are fixed
-	1 correspond to node_1 x-direction
-	2 correspond to node_1 y-direction
-	3 correspond to node_1 theta
-	4 correspond to node_2 x-direction ...
-	For truss each node has 2 degree of freedom
-	1 correspond to node_1 x-direction
-	2 correspond to node_1 y-direction
-	3 correspond to node_2 x-direction ...
-  * force_vector : list
-  	List representing the input force into the structure [fx1, fy1, theta1, ...]
-  * frame_or_truss : char
-  	Specifies which type of structure to create
+  * outer_diameter : float [mm]  
+  * inner_diameter : float [mm]  
+  * modulus_elasticity : float [MPa]  
+  * yield_strength : float [MPa]  
+  * connectivity_table : dict  
+	Dictionary representing the 2 nodes associated with each element {element_id : [nodei_id, nodej_id],...}  
+  * nodal_coordinates : dict  
+	Dictionary representing the coordinates of each node {node_id1 : [x1, y1],...}  
+  * boundary_conditions : list  
+&nbsp;&nbsp;&nbsp;&nbsp; List representing the boundary conditions [0,15,22,...]  
+&nbsp;&nbsp;&nbsp;&nbsp; For frame aach node has 3 degree of freedom, the array determines which DOF are fixed  
+&nbsp;&nbsp;&nbsp;&nbsp; 1 correspond to node_1 x-direction  
+&nbsp;&nbsp;&nbsp;&nbsp; 2 correspond to node_1 y-direction  
+&nbsp;&nbsp;&nbsp;&nbsp; 3 correspond to node_1 theta  
+&nbsp;&nbsp;&nbsp;&nbsp; 4 correspond to node_2 x-direction ...  
+&nbsp;&nbsp;&nbsp;&nbsp; For truss each node has 2 degree of freedom  
+&nbsp;&nbsp;&nbsp;&nbsp; 1 correspond to node_1 x-direction  
+&nbsp;&nbsp;&nbsp;&nbsp; 2 correspond to node_1 y-direction  
+&nbsp;&nbsp;&nbsp;&nbsp; 3 correspond to node_2 x-direction ...  
+  * force_vector : list  
+  	List representing the input force into the structure [fx1, fy1, theta1, ...]  
+  * frame_or_truss : char  
+  	Specifies which type of structure to create  
   
 Returns output_id that identifies the output structure
 
