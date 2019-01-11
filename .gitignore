@@ -1,5 +1,6 @@
 # Virtual Envinronment #
 
 env/
-
 db.sqlite3
+**migrations
+**__pycache__
