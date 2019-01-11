@@ -54,7 +54,7 @@ Parameters:
   * frame_or_truss : char  
   	Specifies which type of structure to create  
   
-Returns output_id that identifies the output structure
+POST request to /input/ returns output_id that identifies the output structure
 
 #### /outout/output_id
 
@@ -64,12 +64,12 @@ Allow: GET, OPTIONS
 Content-Type: application/json
 
 Content example:
-
+```bash
 {
     "nodal_coordinates": "{1: [0.0, 0.0], 2: [0.0, -3.2441318157838754]}",
     "stress": "{1: [424.41318157838754]}"
 }
-
+```
 Output:
   * nodal_coordinates : dict, Dictionary representing the coordinates of each node {node_id1 : [x1, y1],...}
   * stress : dict, Dictionary representing the stress at each element {ele1 : [stress1],...}
