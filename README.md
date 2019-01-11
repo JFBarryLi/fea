@@ -11,8 +11,8 @@ Calculates stress and nodal displacements for a frame or truss structure using f
 
 Create a InputStructure, perform FEA2D and return an OutputStructure
 
-Allow: OPTIONS, POST
-Content-Type: application/json
+Allow: OPTIONS, POST  
+Content-Type: application/json  
 
 Content payload example:
 ```bash
@@ -33,24 +33,29 @@ Parameters:
   * inner_diameter : float [mm]  
   * modulus_elasticity : float [MPa]  
   * connectivity_table : dict  
-	Dictionary representing the 2 nodes associated with each element {element_id : [nodei_id, nodej_id],...}  
+	+ Dictionary representing the 2 nodes associated with each element  
+	{element_id : [nodei_id, nodej_id],...}  
   * nodal_coordinates : dict  
-	Dictionary representing the coordinates of each node {node_id1 : [x1, y1],...}  
+	+ Dictionary representing the coordinates of each node  
+	{node_id1 : [x1, y1],...}  
   * boundary_conditions : list  
-&nbsp;&nbsp;&nbsp;&nbsp; List representing the boundary conditions [0,15,22,...]  
-&nbsp;&nbsp;&nbsp;&nbsp; For frame aach node has 3 degree of freedom, the array determines which DOF are fixed  
-&nbsp;&nbsp;&nbsp;&nbsp; 1 correspond to node_1 x-direction  
-&nbsp;&nbsp;&nbsp;&nbsp; 2 correspond to node_1 y-direction  
-&nbsp;&nbsp;&nbsp;&nbsp; 3 correspond to node_1 theta  
-&nbsp;&nbsp;&nbsp;&nbsp; 4 correspond to node_2 x-direction ...  
-&nbsp;&nbsp;&nbsp;&nbsp; For truss each node has 2 degree of freedom  
-&nbsp;&nbsp;&nbsp;&nbsp; 1 correspond to node_1 x-direction  
-&nbsp;&nbsp;&nbsp;&nbsp; 2 correspond to node_1 y-direction  
-&nbsp;&nbsp;&nbsp;&nbsp; 3 correspond to node_2 x-direction ...  
+	+ List representing the boundary conditions  
+	[0,15,22,...]  
+	+ The array determines which DOF are fixed  
+	+ For frame each node has 3 degree of freedom:  
+		+ index 0 correspond to node_1 x-direction  
+		+ index 1 correspond to node_1 y-direction  
+		+ index 2 correspond to node_1 theta  
+		+ index 3 correspond to node_2 x-direction ...  
+	+ For truss each node has 2 degree of freedom:  
+		+ index 0 correspond to node_1 x-direction  
+		+ index 1 correspond to node_1 y-direction  
+		+ index 2 correspond to node_2 x-direction ...  
   * force_vector : list  
-  	List representing the input force into the structure [fx1, fy1, theta1, ...]  
+	+ List representing the input force into the structure  
+	[fx1, fy1, M1, ...]  
   * frame_or_truss : char  
-  	Specifies which type of structure to create  
+	+ Specifies which type of structure to create  
   
 POST request to /input/ returns output_id that identifies the output structure
 
@@ -58,7 +63,7 @@ POST request to /input/ returns output_id that identifies the output structure
 
 Retrieve OutputStructure corresponding to the InputStructure
 
-Allow: GET, OPTIONS
+Allow: GET, OPTIONS  
 Content-Type: application/json
 
 Content example:
@@ -69,8 +74,12 @@ Content example:
 }
 ```
 Output:
-  * nodal_coordinates : dict, Dictionary representing the coordinates of each node {node_id1 : [x1, y1],...}
-  * stress : dict, Dictionary representing the stress at each element {ele1 : [stress1],...}
+  * nodal_coordinates : dict  
+	+ Dictionary representing the coordinates of each node  
+	{node_id1 : [x1, y1],...}
+  * stress : dict  
+	+ Dictionary representing the stress at each element  
+	{ele1 : [stress1],...}
 
 ### Installation
 
