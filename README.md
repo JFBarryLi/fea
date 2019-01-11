@@ -19,7 +19,6 @@ Content payload example:
 	"outer_diameter":"20",
 	"inner_diameter":"10",
 	"modulus_elasticity":"100",
-	"yield_strength":"1000",
 	"connectivity_table":"{1 : [1, 2]}",
 	"nodal_coordinates":"{1 : [0,0], 2 : [0,1]}",
 	"boundary_conditions":"[ 0, 1, 2]",
@@ -31,7 +30,6 @@ Parameters:
   * outer_diameter : float [mm]
   * inner_diameter : float [mm]
   * modulus_elasticity : float [MPa]
-  * yield_strength : float [MPa]
   * connectivity_table : dict, Dictionary representing the 2 nodes associated with each element {element_id : [nodei_id, nodej_id],...}
   * nodal_coordinates : dict, Dictionary representing the coordinates of each node {node_id1 : [x1, y1],...}
   * boundary_conditions : list, List representing the boundary conditions [0,15,22,...], Each node has 3 degrees of freedom, the array determines which DOF are fixed, 1 correspond to node_1 x-direction, 2 correspond to node_1 y-direction, 3 correspond to node_1 theta, 4 correspond to node_1 x-direction ...

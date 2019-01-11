@@ -24,7 +24,6 @@ class InputStructure(models.Model):
 	outer_diameter = models.FloatField()
 	inner_diameter = models.FloatField()
 	modulus_elasticity = models.FloatField()
-	yield_strength = models.FloatField()
 	connectivity_table = models.TextField()
 	nodal_coordinates = models.TextField()
 	boundary_conditions = models.TextField()

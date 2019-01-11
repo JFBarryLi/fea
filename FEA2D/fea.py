@@ -39,18 +39,15 @@ class element():
 		Inner Diameter
 	OD : float [mm]
 		Outer Diameter
-	Sy : float [MPa]
-		Yield Strength
 	
 	'''
 	
-	def __init__(self, nodei, nodej, E, ID, OD, Sy):
+	def __init__(self, nodei, nodej, E, ID, OD):
 		self.nodei = nodei
 		self.nodej = nodej
 		self.E = E
 		self.ID = ID
 		self.OD = OD
-		self.Sy = Sy
 		
 	def calc_properties(self):
 		'''
@@ -115,7 +112,6 @@ class structure(ABC):
 	outer_diameter : float [mm]
 	inner_diameter : float [mm]
 	modulus_elasticity : float [MPa]
-	yield_strength : float [MPa]
 	connectivity_table : dict
 		Dictionary representing the 2 nodes associated with each element {element_id : [nodei_id, nodej_id],...}
 	nodal_coordinates : dict
@@ -123,20 +119,19 @@ class structure(ABC):
 	boundary_conditions : list
 		List representing the boundary conditions [0,15,22,...]
 		Each node has 3 degrees of freedom, the list determines which DOF are fixed
-		1 correspond to node_1 x-direction, 2 correspond to node_1 y-direction, 3 correspond to node_1 theta, 4 correspond to node_1 x-direction ...
+		1 correspond to node_1 x-direction, 2 correspond to node_1 y-direction, 3 correspond to node_1 theta, 4 correspond to node_2 x-direction ...
 	force_vector : list
 		List representing the input force into the structure [fx1, fy1, theta1, ...]
 	'''
 	
 	@abstractmethod
 	def __init__(self, outer_diameter, inner_diameter, modulus_elasticity,
-				 yield_strength, connectivity_table, nodal_coordinates,
+				 connectivity_table, nodal_coordinates,
 				 boundary_conditions, force_vector):
 				 
 		self.outer_diameter = outer_diameter
 		self.inner_diameter = inner_diameter
 		self.modulus_elasticity = modulus_elasticity
-		self.yield_strength = yield_strength
 		self.connectivity_table = connectivity_table
 		self.nodal_coordinates = nodal_coordinates
 		self.boundary_conditions = boundary_conditions
@@ -167,8 +162,7 @@ class structure(ABC):
 			
 			# Instantiate an element
 			ele = element(nodei, nodej, self.modulus_elasticity, 
-						  self.inner_diameter, self.outer_diameter, 
-						  self.yield_strength)
+						  self.inner_diameter, self.outer_diameter)
 			ele.id = key
 			self.elements[ele.id] = ele
 			
@@ -433,7 +427,6 @@ class fea():
 	outer_diameter : float [mm]
 	inner_diameter : float [mm]
 	modulus_elasticity : float [MPa]
-	yield_strength : float [MPa]
 	connectivity_table : dict
 		Dictionary representing the 2 nodes associated with each element {element_id : [nodei_id, nodej_id],...}
 	nodal_coordinates : dict
@@ -441,7 +434,7 @@ class fea():
 	boundary_conditions : list
 		List representing the boundary conditions [0,15,22,...]
 		Each node has 3 degrees of freedom, the list determines which DOF are fixed
-		1 correspond to node_1 x-direction, 2 correspond to node_1 y-direction, 3 correspond to node_1 theta, 4 correspond to node_1 x-direction ...
+		1 correspond to node_1 x-direction, 2 correspond to node_1 y-direction, 3 correspond to node_1 theta, 4 correspond to node_2 x-direction ...
 	force_vector : list
 		List representing the input force into the structure [fx1, fy1, theta1, ...]
 	frame_or_truss : char
@@ -449,13 +442,12 @@ class fea():
 	'''
 	
 	def __init__(self, outer_diameter, inner_diameter, modulus_elasticity,
-				 yield_strength, connectivity_table, nodal_coordinates,
+				 connectivity_table, nodal_coordinates,
 				 boundary_conditions, force_vector, frame_or_truss):
 				 
 		self.outer_diameter = outer_diameter
 		self.inner_diameter = inner_diameter
 		self.modulus_elasticity = modulus_elasticity
-		self.yield_strength = yield_strength
 		self.connectivity_table = connectivity_table
 		self.nodal_coordinates = nodal_coordinates
 		self.boundary_conditions = boundary_conditions
@@ -492,11 +484,11 @@ class fea():
 		
 		if self.frame_or_truss == 'frame':
 			self.struc = frame(self.outer_diameter, self.inner_diameter, self.modulus_elasticity,
-							   self.yield_strength, self.connectivity_table, self.nodal_coordinates,
+							   self.connectivity_table, self.nodal_coordinates,
 							   self.boundary_conditions, self.force_vector)
 		elif self.frame_or_truss == 'truss':
 			self.struc = truss(self.outer_diameter, self.inner_diameter, self.modulus_elasticity,
-							   self.yield_strength, self.connectivity_table, self.nodal_coordinates,
+							   self.connectivity_table, self.nodal_coordinates,
 							   self.boundary_conditions, self.force_vector)
 							   
 		self.struc.create_nodes()

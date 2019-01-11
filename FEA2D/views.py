@@ -20,7 +20,6 @@ def fea2d_input(request):
 			outer_diameter = instance.outer_diameter
 			inner_diameter = instance.inner_diameter
 			modulus_elasticity = instance.modulus_elasticity
-			yield_strength = instance.yield_strength
 			connectivity_table = eval(instance.connectivity_table)
 			nodal_coordinates = eval(instance.nodal_coordinates)
 			boundary_conditions = eval(instance.boundary_conditions)
@@ -28,7 +27,7 @@ def fea2d_input(request):
 			frame_or_truss = instance.frame_or_truss
 			
 			struc = fea(outer_diameter, inner_diameter, modulus_elasticity,
-						yield_strength, connectivity_table, nodal_coordinates,
+						connectivity_table, nodal_coordinates,
 						boundary_conditions, force_vector, frame_or_truss)
 			struc.analyze()
 			
