@@ -22,13 +22,14 @@ class InputStructure(models.Model):
 	id = models.BigIntegerField(default = gen_id, primary_key=True)  
 	created = models.DateTimeField(auto_now_add=True)
 	ip_address = models.CharField(max_length=50)
-	outer_diameter = models.DecimalField(max_digits=10, decimal_places=2)
-	inner_diameter = models.DecimalField(max_digits=10, decimal_places=2)
-	modulus_elasticity = models.DecimalField(max_digits=10, decimal_places=2)
-	yield_strength = models.DecimalField(max_digits=10, decimal_places=2)
+	outer_diameter = models.FloatField()
+	inner_diameter = models.FloatField()
+	modulus_elasticity = models.FloatField()
+	yield_strength = models.FloatField()
 	connectivity_table = models.TextField()
 	nodal_coordinates = models.TextField()
 	boundary_conditions = models.TextField()
+	force_vector = models.TextField()
 	frame_or_truss = models.CharField(max_length=5)
 	
 	class Meta:

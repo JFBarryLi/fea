@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from .models import InputStructure, OutputStructure
+from .models import InputStructure, OutputStructure, InputOutputLink
 from .serializers import InputStructureSerializer, OutputStructureSerializer
 from .views import FEA2D_input, FEA2D_output
 
@@ -54,7 +54,6 @@ class InputStructureModelTests(TestCase):
 		self.assertEqual(InputStructure.objects.order_by('created')[0].nodal_coordinates, 'testnc')
 	
 class OutputStructureModelTests(TestCase):
-
 	def test_object_creation_with_normal_values(self):
 		'''
 		Check that OutputStructure objects are created properly
@@ -62,7 +61,7 @@ class OutputStructureModelTests(TestCase):
 		struc = OutputStructure(nodal_coordinates='test123', stress='test123')
 		
 		self.assertEqual(struc.nodal_coordinates, 'test123')
-		self.assertEqual(struc.stress, 'test123)
+		self.assertEqual(struc.stress, 'test123')
 	
 	def test_object_save(self):
 		'''
@@ -73,6 +72,18 @@ class OutputStructureModelTests(TestCase):
 		
 		self.assertEqual(OutputStructure.objects.order_by('created')[0].nodal_coordinates, 'test123')
 		self.assertEqual(OutputStructure.objects.order_by('created')[0].stress, 'test123')
+		
+# class InputOutputLink(TestCase):
+	# def test_object_creation(self):
+		# '''
+		# Test the creation of InputOutputLink model
+		# '''
+		
+		# io_link = InputOutputLink(input_id=1234, output_id=5678)
+		
+		# self.assertEqual(InputOutputLink.objects.order_by('created')[0].input_id, 1234)
+		# self.assertEqual(InputOutputLink.objects.order_by('created')[0].output_id, 5678)
+		
 		
 class InputStructureSerializerTests(TestCase):
 	def test_serializer_with_normal_data(self):
@@ -87,18 +98,20 @@ class InputStructureSerializerTests(TestCase):
 								connectivity_table='testct',
 								nodal_coordinates='testnc',
 								boundary_conditions='testbc',
+								force_vector='testfv',
 								frame_or_truss='tesft')
 		
 		serializer = InputStructureSerializer(struc)
 		
 		self.assertEqual(serializer.data, {'ip_address': '999.999.999.999', \
-										   'outer_diameter': '99.99', \
-										   'inner_diameter': '99.99', \
-										   'modulus_elasticity': '99.99', \
-										   'yield_strength': '99.99', \
+										   'outer_diameter': 99.99, \
+										   'inner_diameter': 99.99, \
+										   'modulus_elasticity': 99.99, \
+										   'yield_strength': 99.99, \
 										   'connectivity_table': 'testct', \
 										   'nodal_coordinates': 'testnc', \
 										   'boundary_conditions': 'testbc', \
+										   'force_vector': 'testfv', \
 										   'frame_or_truss': 'tesft'})
 	
 class OutputStructureSerializerTests(TestCase):		
@@ -122,14 +135,15 @@ class FEA2DInputViewTests(TestCase):
 		
 		data = {
 			"ip_address":"999.999.999.999", 
-			"outer_diameter":"99.99",
-			"inner_diameter":"99.99",
-			"modulus_elasticity":"99.99",
-			"yield_strength":"99.99",
-			"connectivity_table":"testct",
-			"nodal_coordinates":"testnc",
-			"boundary_conditions":"testbc",
-			"frame_or_truss":"tesft"
+			"outer_diameter":"20",
+			"inner_diameter":"10",
+			"modulus_elasticity":"100",
+			"yield_strength":"1000",
+			"connectivity_table":"{1 : [1, 2]}",
+			"nodal_coordinates":"{1 : [0,0], 2 : [0,1]}",
+			"boundary_conditions":"[ 0, 1, 2]",
+			"force_vector":"[0, 0, 0, 0, -1, 0]",
+			"frame_or_truss":"frame"
 		}
 		request = factory.post('input/',data, format='json')
 		view = FEA2D_input
@@ -142,7 +156,7 @@ class FEA2DOutputViewTests(TestCase):
 		'''
 		Check for a valid status given valid key
 		'''
-		struc = OutputStructure(nodal_coordinates='test123', factor_of_safety=99.99)
+		struc = OutputStructure(nodal_coordinates='test123', stress='test123')
 		struc.save()
 		id = OutputStructure.objects.all()[0].id
 		

@@ -399,7 +399,7 @@ class truss(structure):
 			nodal_coordinates_list.append(self.nodal_coordinates[key][1])
 			
 		for i in range(0, len(nodal_coordinates_list)):
-			nodal_coordinates_list[i] = nodal_coordinates_list[i] + disp_without_moment[i] 
+			nodal_coordinates_list[i] = nodal_coordinates_list[i] + self.Q[i] 
 
 		# Constructing the new_nodal_coordinates dictionary
 		for i in range(1, int(len(nodal_coordinates_list)/2+1)):
@@ -505,7 +505,10 @@ class fea():
 		self.struc.calc_stiffness()
 		self.struc.calc_assemblage()
 		self.struc.calc_displacement()
-		self.struc.calc_new_nodal_coordinates
+		self.struc.calc_new_nodal_coordinates()
 		self.struc.calc_stress()
+		
+		self.new_nodal_coordinates = self.struc.new_nodal_coordinates
+		self.stress = self.struc.stress
 		
 		return 'success'
