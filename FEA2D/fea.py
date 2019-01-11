@@ -120,12 +120,12 @@ class structure(ABC):
 		Dictionary representing the 2 nodes associated with each element {element_id : [nodei_id, nodej_id],...}
 	nodal_coordinates : dict
 		Dictionary representing the coordinates of each node {node_id1 : [x1, y1],...}
-	boundary_conditions : array
-		Array representing the boundary conditions [0,15,22,...]
-		Each node has 3 degrees of freedom, the array determines which DOF are fixed
+	boundary_conditions : list
+		List representing the boundary conditions [0,15,22,...]
+		Each node has 3 degrees of freedom, the list determines which DOF are fixed
 		1 correspond to node_1 x-direction, 2 correspond to node_1 y-direction, 3 correspond to node_1 theta, 4 correspond to node_1 x-direction ...
-	force_vector : array
-		Array representing the input force into the structure [fx1, fy1, theta1, ...]
+	force_vector : list
+		List representing the input force into the structure [fx1, fy1, theta1, ...]
 	'''
 	
 	@abstractmethod
@@ -438,12 +438,12 @@ class fea():
 		Dictionary representing the 2 nodes associated with each element {element_id : [nodei_id, nodej_id],...}
 	nodal_coordinates : dict
 		Dictionary representing the coordinates of each node {node_id1 : [x1, y1],...}
-	boundary_conditions : array
-		Array representing the boundary conditions [0,15,22,...]
-		Each node has 3 degrees of freedom, the array determines which DOF are fixed
+	boundary_conditions : list
+		List representing the boundary conditions [0,15,22,...]
+		Each node has 3 degrees of freedom, the list determines which DOF are fixed
 		1 correspond to node_1 x-direction, 2 correspond to node_1 y-direction, 3 correspond to node_1 theta, 4 correspond to node_1 x-direction ...
-	force_vector : array
-		Array representing the input force into the structure [fx1, fy1, theta1, ...]
+	force_vector : list
+		List representing the input force into the structure [fx1, fy1, theta1, ...]
 	frame_or_truss : char
 		Specify which type of structure to create
 	'''
