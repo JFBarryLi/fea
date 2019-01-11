@@ -1,3 +1,5 @@
 # Virtual Envinronment #
 
 env/
+
+db.sqlite3
