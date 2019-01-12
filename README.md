@@ -1,4 +1,4 @@
-# FEA2D_WebApp
+# FEA_WebApp
 
 REST API written with django REST framework
 
