@@ -1,5 +1,7 @@
 '''
 Finite Element Analysis for 2D frame or Truss
+Author : Barry Li
+Licence : MIT 
 '''
 
 import numpy as np

@@ -1,12 +1,12 @@
-from FEA2D.models import InputStructure, OutputStructure, InputOutputLink
-from FEA2D.serializers import InputStructureSerializer, OutputStructureSerializer
+from fea_structure.models import InputStructure, OutputStructure, InputOutputLink
+from fea_structure.serializers import InputStructureSerializer, OutputStructureSerializer
 from rest_framework.decorators import api_view
 from rest_framework import status
 from rest_framework.response import Response
 from .fea import node, element, structure, frame, truss, fea
 
 @api_view(['POST'])
-def fea2d_input(request):
+def fea_structure_input(request):
 	'''
 	Create a InputStructure, perform FEA2D and return an OutputStructure
 	'''
@@ -42,7 +42,7 @@ def fea2d_input(request):
 		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
-def fea2d_output(request, output_structure_id):
+def fea_structure_output(request, output_structure_id):
 	'''
 	Retrieve OutputStructure corresponding to the InputStructure
 	'''

@@ -37,7 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-	'FEA2D.apps.Fea2DConfig',
+	'fea_structure.apps.FeaStructureConfig',
 	'rest_framework'
 ]
 
@@ -51,7 +51,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'FEA2D_WebApp.urls'
+ROOT_URLCONF = 'FEA_WebApp.urls'
 
 TEMPLATES = [
     {
@@ -69,7 +69,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'FEA2D_WebApp.wsgi.application'
+WSGI_APPLICATION = 'FEA_WebApp.wsgi.application'
 
 
 # Database

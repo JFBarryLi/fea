@@ -2,7 +2,7 @@ from django.test import TestCase
 
 from .models import InputStructure, OutputStructure, InputOutputLink
 from .serializers import InputStructureSerializer, OutputStructureSerializer
-from .views import fea2d_input, fea2d_output
+from .views import fea_structure_input, fea_structure_output
 
 from rest_framework.test import APIRequestFactory
 
@@ -134,7 +134,7 @@ class FEA2DInputViewTests(TestCase):
 			"frame_or_truss":"frame"
 		}
 		request = factory.post('input/',data, format='json')
-		view = fea2d_input
+		view = fea_structure_input
 		response = view(request)
 		
 		self.assertEqual(response.status_code, 201)
@@ -152,7 +152,7 @@ class FEA2DOutputViewTests(TestCase):
 		
 		factory = APIRequestFactory()
 		request = factory.get(url)
-		view = fea2d_output
+		view = fea_structure_output
 		response = view(request, id)
 		
 		self.assertEqual(response.status_code, 200)
