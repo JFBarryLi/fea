@@ -9,7 +9,7 @@ Calculates stress and nodal displacements for a frame or truss structure using f
 
 #### /input/
 
-Create a InputStructure, perform FEA2D and return an OutputStructure
+Create an InputStructure, perform finite element analysis and return an OutputStructure
 
 Allow: OPTIONS, POST  
 Content-Type: application/json  

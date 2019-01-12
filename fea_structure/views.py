@@ -8,7 +8,7 @@ from .fea import node, element, structure, frame, truss, fea
 @api_view(['POST'])
 def fea_structure_input(request):
 	'''
-	Create a InputStructure, perform FEA2D and return an OutputStructure
+	Create an InputStructure, perform finite element analysis and return an OutputStructure
 	'''
 	
 	if request.method == 'POST':
