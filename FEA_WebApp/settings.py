@@ -37,8 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-	'fea_structure.apps.FeaStructureConfig',
-	'rest_framework'
+		'fea_structure.apps.FeaStructureConfig',
+		'rest_framework'
 ]
 
 MIDDLEWARE = [

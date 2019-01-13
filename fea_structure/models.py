@@ -21,8 +21,9 @@ class InputStructure(models.Model):
 	
 	id = models.BigIntegerField(default = gen_id, primary_key=True)  
 	created = models.DateTimeField(auto_now_add=True)
-	outer_diameter = models.FloatField()
-	inner_diameter = models.FloatField()
+	moment_of_inertia = models.FloatField()
+	cross_sectional_area = models.FloatField()
+	y_max = models.FloatField()
 	modulus_elasticity = models.FloatField()
 	connectivity_table = models.TextField()
 	nodal_coordinates = models.TextField()

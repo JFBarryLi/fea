@@ -16,16 +16,18 @@ class InputStructureModelTests(TestCase):
 		'''
 		Check that InputStructure objects are created and saved properly
 		'''
-		struc = InputStructure(outer_diameter=99.99,
-							   inner_diameter=99.99,
+		struc = InputStructure(moment_of_inertia=99.99,
+							   cross_sectional_area=99.99,
+							   y_max=99.99,
 							   modulus_elasticity=99.99,
 							   connectivity_table='testct',
 							   nodal_coordinates='testnc',
 							   boundary_conditions='testbc',
 							   frame_or_truss='tesft')
 		
-		self.assertEqual(struc.outer_diameter, 99.99)
-		self.assertEqual(struc.inner_diameter, 99.99)
+		self.assertEqual(struc.moment_of_inertia, 99.99)
+		self.assertEqual(struc.cross_sectional_area, 99.99)
+		self.assertEqual(struc.y_max, 99.99)
 		self.assertEqual(struc.modulus_elasticity, 99.99)
 		self.assertEqual(struc.connectivity_table, 'testct')
 		self.assertEqual(struc.nodal_coordinates, 'testnc')
@@ -36,8 +38,9 @@ class InputStructureModelTests(TestCase):
 		'''
 		Check InputStructure are saved properly
 		'''
-		struc = InputStructure(outer_diameter=99.99,
-							   inner_diameter=99.99,
+		struc = InputStructure(moment_of_inertia=99.99,
+							   cross_sectional_area=99.99,
+							   y_max=99.99,
 							   modulus_elasticity=99.99,
 							   connectivity_table='testct',
 							   nodal_coordinates='testnc',
@@ -84,8 +87,9 @@ class InputStructureSerializerTests(TestCase):
 		'''
 		Check serializer output with normal data
 		'''
-		struc = InputStructure(outer_diameter=99.99,
-							   inner_diameter=99.99,
+		struc = InputStructure(moment_of_inertia=99.99,
+							   cross_sectional_area=99.99,
+							   y_max=99.99,
 							   modulus_elasticity=99.99,
 							   connectivity_table='testct',
 							   nodal_coordinates='testnc',
@@ -95,8 +99,9 @@ class InputStructureSerializerTests(TestCase):
 		
 		serializer = InputStructureSerializer(struc)
 		
-		self.assertEqual(serializer.data, {'outer_diameter': 99.99, \
-										   'inner_diameter': 99.99, \
+		self.assertEqual(serializer.data, {'moment_of_inertia': 99.99, \
+										   'cross_sectional_area': 99.99, \
+										   'y_max': 99.99, \
 										   'modulus_elasticity': 99.99, \
 										   'connectivity_table': 'testct', \
 										   'nodal_coordinates': 'testnc', \
@@ -115,7 +120,7 @@ class OutputStructureSerializerTests(TestCase):
 		
 		self.assertEqual(serializer.data, {'nodal_coordinates': 'test123', 'stress': 'test123'})
 			
-class FEA2DInputViewTests(TestCase):		
+class FeaStructureInputViewTests(TestCase):		
 	def test_Json_input_object(self):
 		'''
 		Check for a valid status given valid data
@@ -124,8 +129,9 @@ class FEA2DInputViewTests(TestCase):
 		factory = APIRequestFactory()
 		
 		data = {
-			"outer_diameter":"20",
-			"inner_diameter":"10",
+			"moment_of_inertia":"7363.1078",
+			"cross_sectional_area":"235.619",
+			"y_max":"10",
 			"modulus_elasticity":"100",
 			"connectivity_table":"{1 : [1, 2]}",
 			"nodal_coordinates":"{1 : [0,0], 2 : [0,1]}",
@@ -157,7 +163,7 @@ class FEA2DOutputViewTests(TestCase):
 		
 		self.assertEqual(response.status_code, 200)
 		
-class FEA2DNodeTests(TestCase):
+class FeaStructureNodeTests(TestCase):
 	def test_fea_node_creation(self):
 		'''
 		Check for node creation
@@ -168,7 +174,7 @@ class FEA2DNodeTests(TestCase):
 		self.assertEqual(test_node.x, 2)
 		self.assertEqual(test_node.y, 3)
 		
-class FEA2DElementTests(TestCase):
+class FeaStructureElementTests(TestCase):
 	def test_fea_element_creation(self):
 		'''
 		Check for element creation
@@ -180,8 +186,8 @@ class FEA2DElementTests(TestCase):
 		self.assertEqual(test_element.nodei, nodei)
 		self.assertEqual(test_element.nodej, nodej)
 		self.assertEqual(test_element.E, 99.99)
-		self.assertEqual(test_element.ID, 99.99)
-		self.assertEqual(test_element.OD, 99.99)
+		self.assertEqual(test_element.I, 99.99)
+		self.assertEqual(test_element.A, 99.99)
 		
 	def test_fea_element_calc_properties_normal_values(self):
 		'''
@@ -195,8 +201,8 @@ class FEA2DElementTests(TestCase):
 		self.assertEqual(test_element.L, 1)
 		self.assertEqual(test_element.Cx, 0)
 		self.assertEqual(test_element.Cy, 1)
-		self.assertEqual(test_element.I, (20**4 - 10**4) * np.pi / 64)
-		self.assertEqual(test_element.A, (20**2 - 10**2) * np.pi / 4)
+		self.assertEqual(test_element.I, 10)
+		self.assertEqual(test_element.A, 20)
 		
 	def test_fea_element_calc_stiffness_frame(self):
 		'''
@@ -204,7 +210,7 @@ class FEA2DElementTests(TestCase):
 		'''
 		nodei = node(1, 0, 0)
 		nodej = node(2, 0, 10)
-		test_element = element(nodei, nodej, 10, 10, 20)
+		test_element = element(nodei, nodej, 10, 10, 1)
 		test_element.E = 10
 		test_element.I = 10
 		test_element.A = 1
@@ -228,7 +234,7 @@ class FEA2DElementTests(TestCase):
 		'''
 		nodei = node(1, 0, 0)
 		nodej = node(2, 4, 3)
-		test_element = element(nodei, nodej, 10, 10, 20)
+		test_element = element(nodei, nodej, 10, 10, 1)
 		test_element.E = 10
 		test_element.I = 10
 		test_element.A = 1
@@ -245,25 +251,27 @@ class FEA2DElementTests(TestCase):
 		self.assertEqual(equal, True)
 
 	
-class FEA2DFrameTests(TestCase):
+class FeaStructureFrameTests(TestCase):
 	def test_fea_structure_creation(self):
 		'''
 		Test the creation of the frame object
 		'''
-		outer_diameter = 10
-		inner_diameter = 5
+		moment_of_inertia = 10
+		cross_sectional_area = 5
+		y_max = 10
 		modulus_elasticity = 10
 		connectivity_table = {1 : [1, 2], 2 : [2, 3]}
 		nodal_coordinates = {1 : [0,0], 2 : [0,1], 3 : [10,10]}
 		boundary_conditions = [1,2,3]
 		force_vector = [0, 0, 0, 0, -1, 0]
 		
-		test_frame = frame(outer_diameter, inner_diameter, modulus_elasticity,
-						   connectivity_table, nodal_coordinates,
+		test_frame = frame(moment_of_inertia, cross_sectional_area, y_max,
+						   modulus_elasticity, connectivity_table, nodal_coordinates,
 						   boundary_conditions, force_vector)
 						   
-		self.assertEqual(test_frame.outer_diameter, 10)
-		self.assertEqual(test_frame.inner_diameter, 5)
+		self.assertEqual(test_frame.moment_of_inertia, 10)
+		self.assertEqual(test_frame.cross_sectional_area, 5)
+		self.assertEqual(test_frame.y_max, 10)
 		self.assertEqual(test_frame.modulus_elasticity, 10)
 		self.assertEqual(test_frame.connectivity_table, {1 : [1, 2], 2 : [2, 3]})
 		self.assertEqual(test_frame.nodal_coordinates, {1 : [0,0], 2 : [0,1], 3 : [10,10]})
@@ -274,16 +282,17 @@ class FEA2DFrameTests(TestCase):
 		'''
 		Test the creation of nodes from the nodal_coordinates
 		'''
-		outer_diameter = 10
-		inner_diameter = 5
+		moment_of_inertia = 10
+		cross_sectional_area = 5
+		y_max = 10
 		modulus_elasticity = 10
 		connectivity_table = {1 : [1, 2], 2 : [2, 3]}
 		nodal_coordinates = {1 : [0,0], 2 : [0,1], 3 : [10,10]}
 		boundary_conditions = [1,2,3]
 		force_vector = [0, 0, 0, 0, -1, 0]
 		
-		test_frame = frame(outer_diameter, inner_diameter, modulus_elasticity,
-						   connectivity_table, nodal_coordinates,
+		test_frame = frame(moment_of_inertia, cross_sectional_area, y_max, 
+						   modulus_elasticity, connectivity_table, nodal_coordinates,
 						   boundary_conditions, force_vector)
 		
 		test_frame.create_nodes()
@@ -294,16 +303,17 @@ class FEA2DFrameTests(TestCase):
 		'''
 		Test the creation of elements from the connectivity_table
 		'''
-		outer_diameter = 10
-		inner_diameter = 5
+		moment_of_inertia = 10
+		cross_sectional_area = 5
+		y_max = 10
 		modulus_elasticity = 10
 		connectivity_table = {1 : [1, 2], 2 : [2, 3]}
 		nodal_coordinates = {1 : [0,0], 2 : [0,1], 3 : [10,10]}
 		boundary_conditions = [1,2,3]
 		force_vector = [0, 0, 0, 0, -1, 0]
 		
-		test_frame = frame(outer_diameter, inner_diameter, modulus_elasticity,
-						   connectivity_table, nodal_coordinates,
+		test_frame = frame(moment_of_inertia, cross_sectional_area, y_max, 
+						   modulus_elasticity, connectivity_table, nodal_coordinates,
 						   boundary_conditions, force_vector)
 		
 		test_frame.create_nodes()
@@ -315,16 +325,17 @@ class FEA2DFrameTests(TestCase):
 		'''
 		Test the calc_properties method of each element
 		'''
-		outer_diameter = 10
-		inner_diameter = 5
+		moment_of_inertia = 10
+		cross_sectional_area = 5
+		y_max = 10
 		modulus_elasticity = 10
 		connectivity_table = {1 : [1, 2], 2 : [2, 3]}
 		nodal_coordinates = {1 : [0,0], 2 : [0,1], 3 : [10,10]}
 		boundary_conditions = [1,2,3]
 		force_vector = [0, 0, 0, 0, -1, 0]
 		
-		test_frame = frame(outer_diameter, inner_diameter, modulus_elasticity,
-						   connectivity_table, nodal_coordinates,
+		test_frame = frame(moment_of_inertia, cross_sectional_area, y_max, 
+						   modulus_elasticity, connectivity_table, nodal_coordinates,
 						   boundary_conditions, force_vector)
 		
 		test_frame.create_nodes()
@@ -334,30 +345,27 @@ class FEA2DFrameTests(TestCase):
 		self.assertEqual(test_frame.elements[1].L, 1)
 		self.assertEqual(test_frame.elements[1].Cx, 0)
 		self.assertEqual(test_frame.elements[1].Cy, 1)
-		self.assertEqual(np.round(test_frame.elements[1].I, 2), 460.19)
-		self.assertEqual(np.round(test_frame.elements[1].A, 2), 58.90)
 
 	def test_fea_frame_element_calc_stiffness(self):
 		'''
 		Test the calc_stiffness method of each element
 		'''
-		outer_diameter = 10
-		inner_diameter = 5
+		moment_of_inertia = 1
+		cross_sectional_area = 1
+		y_max = 10
 		modulus_elasticity = 1
 		connectivity_table = {1 : [1, 2], 2 : [2, 3]}
 		nodal_coordinates = {1 : [0,0], 2 : [0,1], 3 : [10,10]}
 		boundary_conditions = [1,2,3]
 		force_vector = [0, 0, 0, 0, -1, 0]
 		
-		test_frame = frame(outer_diameter, inner_diameter, modulus_elasticity,
-						   connectivity_table, nodal_coordinates,
+		test_frame = frame(moment_of_inertia, cross_sectional_area, y_max, 
+						   modulus_elasticity, connectivity_table, nodal_coordinates,
 						   boundary_conditions, force_vector)
 		
 		test_frame.create_nodes()
 		test_frame.create_elements()
 		test_frame.calc_properties()
-		test_frame.elements[1].A = 1
-		test_frame.elements[1].I = 1
 		test_frame.calc_stiffness()
 		
 		equal = (test_frame.elements[1].K == np.matrix([[12., 0., 6., -12., 0., 6.],
@@ -373,23 +381,22 @@ class FEA2DFrameTests(TestCase):
 		'''
 		Test the calc_assemblage method for frame
 		'''
-		outer_diameter = 10
-		inner_diameter = 5
+		moment_of_inertia = 1
+		cross_sectional_area = 1
+		y_max = 10
 		modulus_elasticity = 1
 		connectivity_table = {1 : [1, 2], 2 : [2, 3]}
 		nodal_coordinates = {1 : [0,0], 2 : [0,1], 3 : [10,10]}
 		boundary_conditions = [1,2,3]
 		force_vector = [0, 0, 0, 0, -1, 0]
 		
-		test_frame = frame(outer_diameter, inner_diameter, modulus_elasticity,
-						   connectivity_table, nodal_coordinates,
+		test_frame = frame(moment_of_inertia, cross_sectional_area, y_max, 
+						   modulus_elasticity, connectivity_table, nodal_coordinates,
 						   boundary_conditions, force_vector)
 		
 		test_frame.create_nodes()
 		test_frame.create_elements()
 		test_frame.calc_properties()
-		test_frame.elements[1].A = 1
-		test_frame.elements[1].I = 1
 		test_frame.calc_stiffness()
 		test_frame.elements[2].K = np.matrix([[12., 0., 6., -12., 0., 6.],
 											  [0., 1., 0., 0., -1., 0.],
@@ -415,16 +422,17 @@ class FEA2DFrameTests(TestCase):
 		'''
 		Test the calc_displacement method for frame
 		'''
-		outer_diameter = 10
-		inner_diameter = 5
+		moment_of_inertia = 1000
+		cross_sectional_area = 100
+		y_max = 10
 		modulus_elasticity = 10
 		connectivity_table = {1 : [1, 2]}
 		nodal_coordinates = {1 : [0,0], 2 : [0,1]}
 		boundary_conditions = [0,1,2]
 		force_vector = [0, 0, 0, 0, -1, 0]
 		
-		test_frame = frame(outer_diameter, inner_diameter, modulus_elasticity,
-						   connectivity_table, nodal_coordinates,
+		test_frame = frame(moment_of_inertia, cross_sectional_area, y_max, 
+						   modulus_elasticity, connectivity_table, nodal_coordinates,
 						   boundary_conditions, force_vector)
 		
 		test_frame.create_nodes()
@@ -434,25 +442,27 @@ class FEA2DFrameTests(TestCase):
 		test_frame.calc_assemblage()
 		test_frame.calc_displacement()
 		
-		equal = (test_frame.Q.round(8) == np.matrix([[0,0,0,0,-0.00169765,0]]).transpose()).all()
+		equal = (test_frame.Q.round(6) == np.matrix([[0,0,0,0,-0.001,0]]).transpose()).all()
 
 		self.assertEqual(equal, True)
+		# self.assertIs(test_frame.Q,1)
 		self.assertEqual(len(test_frame.Q), 6)
 
 	def test_fea_frame_calc_new_nodal_coordinates(self):
 		'''
 		Test the calc_new_nodal_coordinates method
 		'''
-		outer_diameter = 10
-		inner_diameter = 5
+		moment_of_inertia = 10
+		cross_sectional_area = 5
+		y_max = 10
 		modulus_elasticity = 10
 		connectivity_table = {1 : [1, 2], 2 : [2, 3], 3 : [3, 4], 4 : [4, 5]}
 		nodal_coordinates = {1 : [0,0], 2 : [0,1], 3 : [1,2], 4 : [4,5], 5 : [10, 10]}
 		boundary_conditions = [0,1,2]
 		force_vector = [0, 0, 0, 0, -1, 0]
 		
-		test_frame = frame(outer_diameter, inner_diameter, modulus_elasticity,
-						   connectivity_table, nodal_coordinates,
+		test_frame = frame(moment_of_inertia, cross_sectional_area, y_max,
+						   modulus_elasticity, connectivity_table, nodal_coordinates,
 						   boundary_conditions, force_vector)
 		
 		test_frame.Q = np.matrix([1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]).transpose()
@@ -464,43 +474,45 @@ class FEA2DFrameTests(TestCase):
 		'''
 		Test the calc_stress method for frame
 		'''
-		outer_diameter = 10
-		inner_diameter = 0
+		moment_of_inertia = 490.87385
+		cross_sectional_area = 78.53982
+		y_max = 5
 		modulus_elasticity = 10
 		connectivity_table = {1 : [1, 2]}
 		nodal_coordinates = {1 : [0,0], 2 : [0,1]}
-		boundary_conditions = [0,1]
-		force_vector = [ 0, 0, 0, -1]
+		boundary_conditions = [0,1,2]
+		force_vector = [ 0, 0, 0, 0, -1, 0]
 		
-		test_truss = truss(outer_diameter, inner_diameter, modulus_elasticity,
-						   connectivity_table, nodal_coordinates,
+		test_frame = frame(moment_of_inertia, cross_sectional_area, y_max, 
+						   modulus_elasticity, connectivity_table, nodal_coordinates,
 						   boundary_conditions, force_vector)
 						   
-		test_truss.create_nodes()
-		test_truss.create_elements()
-		test_truss.calc_properties()
-		test_truss.calc_stiffness()
-		test_truss.calc_assemblage()
-		test_truss.calc_displacement()
-		test_truss.calc_stress()
+		test_frame.create_nodes()
+		test_frame.create_elements()
+		test_frame.calc_properties()
+		test_frame.calc_stiffness()
+		test_frame.calc_assemblage()
+		test_frame.calc_displacement()
+		test_frame.calc_stress()
 		
-		self.assertEqual(round(test_truss.stress[1][0],4), -0.0127)
+		self.assertEqual(round(test_frame.stress[1][0],4), 0.0127)
 
 class FEA2DTrussTests(TestCase):
 	def test_fea_truss_calc_assemblage(self):
 		'''
 		Test the calc_assemblage method for truss
 		'''
-		outer_diameter = 10
-		inner_diameter = 5
+		moment_of_inertia = 10
+		cross_sectional_area = 5
+		y_max = 10
 		modulus_elasticity = 1
 		connectivity_table = {1 : [1, 2], 2 : [2, 3]}
 		nodal_coordinates = {1 : [0,0], 2 : [0,1], 3 : [10,10]}
 		boundary_conditions = [1,2,3]
 		force_vector = [0, 0, 0, 0, -1, 0]
 		
-		test_truss = truss(outer_diameter, inner_diameter, modulus_elasticity,
-						   connectivity_table, nodal_coordinates,
+		test_truss = truss(moment_of_inertia, cross_sectional_area, y_max, 
+						   modulus_elasticity, connectivity_table, nodal_coordinates,
 						   boundary_conditions, force_vector)
 		
 		test_truss.create_nodes()
@@ -530,16 +542,17 @@ class FEA2DTrussTests(TestCase):
 		'''
 		Test the calc_stress method for truss
 		'''
-		outer_diameter = 10
-		inner_diameter = 0
+		moment_of_inertia = 490.87385
+		cross_sectional_area = 78.53982
+		y_max = 5
 		modulus_elasticity = 10
 		connectivity_table = {1 : [1, 2]}
 		nodal_coordinates = {1 : [0,0], 2 : [0,1]}
 		boundary_conditions = [0,1]
 		force_vector = [ 0, 0, 0, -1]
 		
-		test_truss = truss(outer_diameter, inner_diameter, modulus_elasticity,
-						   connectivity_table, nodal_coordinates,
+		test_truss = truss(moment_of_inertia, cross_sectional_area, y_max, 
+						   modulus_elasticity, connectivity_table, nodal_coordinates,
 						   boundary_conditions, force_vector)
 						   
 		test_truss.create_nodes()
@@ -552,36 +565,15 @@ class FEA2DTrussTests(TestCase):
 		
 		self.assertEqual(round(test_truss.stress[1][0],4), -0.0127)
 
-class FEA2DFeaTests(TestCase):
-	def test_fea_fea_data_validate_diameter_error(self):
-		'''
-		Test the data_validate method; diameter error
-		'''
-		
-		outer_diameter = 10
-		inner_diameter = 20
-		modulus_elasticity = 10
-		connectivity_table = {1 : [1, 2]}
-		nodal_coordinates = {1 : [0,0], 2 : [0,1]}
-		boundary_conditions = [0,1]
-		force_vector = [ 0, 0, 0, 0, -1, 0]
-		frame_or_truss = 'frame'
-		
-		test_fea = fea(outer_diameter, inner_diameter, modulus_elasticity,
-					   connectivity_table, nodal_coordinates,
-					   boundary_conditions, force_vector, frame_or_truss)
-					   
-		
-
-		self.assertEqual(test_fea.analyze(), "ERROR: inner diameter greater or equal to outer diameter")
-		
+class FEA2DFeaTests(TestCase):		
 	def test_fea_fea_data_validate_force_error(self):
 		'''
 		Test the data_validate method; force vector error
 		'''
 		
-		outer_diameter = 30
-		inner_diameter = 20
+		moment_of_inertia = 30
+		cross_sectional_area = 20
+		y_max = 15
 		modulus_elasticity = 10
 		connectivity_table = {1 : [1, 2]}
 		nodal_coordinates = {1 : [0,0], 2 : [0,1]}
@@ -589,8 +581,8 @@ class FEA2DFeaTests(TestCase):
 		force_vector = [0, 0, 0, -1, 0]
 		frame_or_truss = 'frame'
 		
-		test_fea = fea(outer_diameter, inner_diameter, modulus_elasticity,
-					   connectivity_table, nodal_coordinates,
+		test_fea = fea(moment_of_inertia, cross_sectional_area, y_max, 
+					   modulus_elasticity, connectivity_table, nodal_coordinates,
 					   boundary_conditions, force_vector, frame_or_truss)
 					   
 		
@@ -602,8 +594,9 @@ class FEA2DFeaTests(TestCase):
 		Test the analyze method for the fea class
 		'''
 		
-		outer_diameter = 10
-		inner_diameter = 0
+		moment_of_inertia = 490.87385
+		cross_sectional_area = 78.53982
+		y_max = 5
 		modulus_elasticity = 10
 		connectivity_table = {1 : [1, 2]}
 		nodal_coordinates = {1 : [0,0], 2 : [0,1]}
@@ -611,8 +604,8 @@ class FEA2DFeaTests(TestCase):
 		force_vector = [ 0, 0, 0, 0, -1, 0]
 		frame_or_truss = 'frame'
 		
-		test_fea = fea(outer_diameter, inner_diameter, modulus_elasticity,
-					   connectivity_table, nodal_coordinates,
+		test_fea = fea(moment_of_inertia, cross_sectional_area, y_max, 
+					   modulus_elasticity, connectivity_table, nodal_coordinates,
 					   boundary_conditions, force_vector, frame_or_truss)
 					   
 		test_fea.analyze()
@@ -624,8 +617,9 @@ class FEA2DFeaTests(TestCase):
 		Test the analyze method for the fea class
 		'''
 		
-		outer_diameter = 10
-		inner_diameter = 0
+		moment_of_inertia = 490.87385
+		cross_sectional_area = 78.53982
+		y_max = 5
 		modulus_elasticity = 10
 		connectivity_table = {1 : [1, 2]}
 		nodal_coordinates = {1 : [0,0], 2 : [0,1]}
@@ -633,8 +627,8 @@ class FEA2DFeaTests(TestCase):
 		force_vector = [ 0, 0, 0, -1]
 		frame_or_truss = 'truss'
 		
-		test_fea = fea(outer_diameter, inner_diameter, modulus_elasticity,
-					   connectivity_table, nodal_coordinates,
+		test_fea = fea(moment_of_inertia, cross_sectional_area, y_max,
+					   modulus_elasticity, connectivity_table, nodal_coordinates,
 					   boundary_conditions, force_vector, frame_or_truss)
 					   
 		test_fea.analyze()

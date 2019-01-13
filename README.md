@@ -7,7 +7,7 @@ Calculates stress and nodal displacements for a frame or truss structure using f
 
 ### API Endpoints
 
-#### /input/
+#### fea/structure/input/
 
 Create an InputStructure, perform finite element analysis and return an OutputStructure
 
@@ -17,8 +17,9 @@ Content-Type: application/json
 Content payload example:
 ```bash
 {
-	"outer_diameter":"20",
-	"inner_diameter":"10",
+	"moment_of_inertia":"20",
+	"cross_sectional_area":"10",
+	"y_max":"1",
 	"modulus_elasticity":"100",
 	"connectivity_table":"{1 : [1, 2]}",
 	"nodal_coordinates":"{1 : [0,0], 2 : [0,1]}",
@@ -29,8 +30,10 @@ Content payload example:
 ```
 
 Parameters:
-  * outer_diameter : float [mm]  
-  * inner_diameter : float [mm]  
+  * moment_of_inertia : float [mm^4]  
+  * cross_sectional_area : float [mm^2]  
+  * y_max : float [mm]
+	+ Distance from neutral axis to surface in the y-direction
   * modulus_elasticity : float [MPa]  
   * connectivity_table : dict  
 	+ Dictionary representing the 2 nodes associated with each element  
@@ -59,7 +62,7 @@ Parameters:
   
 POST request to /input/ returns output_id that identifies the output structure
 
-#### /outout/output_id
+#### fea/structure/outout/output_id
 
 Retrieve OutputStructure corresponding to the InputStructure
 

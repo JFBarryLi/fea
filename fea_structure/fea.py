@@ -1,7 +1,6 @@
 '''
 Finite Element Analysis for 2D frame or Truss
 Author : Barry Li
-Licence : MIT 
 '''
 
 import numpy as np
@@ -16,7 +15,6 @@ class node():
 	id : int
 	x : float
 	y : float
-	
 	'''
 
 	def __init__(self, id, x, y):
@@ -37,19 +35,18 @@ class element():
 		Node object, representing node j
 	E : float [MPa]
 		Young's Modulus
-	ID : float [mm]
-		Inner Diameter
-	OD : float [mm]
-		Outer Diameter
-	
+	I : float [mm^4]
+		Area moment of inertia
+	A : float [mm^2]
+		Cross sectional area
 	'''
 	
-	def __init__(self, nodei, nodej, E, ID, OD):
+	def __init__(self, nodei, nodej, E, I, A):
 		self.nodei = nodei
 		self.nodej = nodej
 		self.E = E
-		self.ID = ID
-		self.OD = OD
+		self.I = I
+		self.A = A
 		
 	def calc_properties(self):
 		'''
@@ -65,12 +62,6 @@ class element():
 		
 		#Cosiney
 		self.Cy = (self.nodej.y - self.nodei.y) / self.L
-		
-		#Moment of Inertia [mm^4]
-		self.I = (self.OD**4 - self.ID**4) * np.pi / 64
-		
-		#Cross Sectional Area [mm^2]
-		self.A = (self.OD**2 - self.ID**2) * np.pi / 4
 		
 	def calc_stiffness_frame(self):
 		'''
@@ -111,8 +102,10 @@ class structure(ABC):
 	
 	Parameters
 	----------
-	outer_diameter : float [mm]
-	inner_diameter : float [mm]
+	moment_of_inertia : float [mm^4]
+	cross_sectional_area : float [mm^2]
+	y_max : float [mm]
+		Max distance from neutral axis to the surface in the y-direction
 	modulus_elasticity : float [MPa]
 	connectivity_table : dict
 		Dictionary representing the 2 nodes associated with each element {element_id : [nodei_id, nodej_id],...}
@@ -127,12 +120,13 @@ class structure(ABC):
 	'''
 	
 	@abstractmethod
-	def __init__(self, outer_diameter, inner_diameter, modulus_elasticity,
-				 connectivity_table, nodal_coordinates,
-				 boundary_conditions, force_vector):
+	def __init__(self, moment_of_inertia, cross_sectional_area, 
+				 y_max, modulus_elasticity, connectivity_table, 
+				 nodal_coordinates, boundary_conditions, force_vector):
 				 
-		self.outer_diameter = outer_diameter
-		self.inner_diameter = inner_diameter
+		self.moment_of_inertia = moment_of_inertia
+		self.cross_sectional_area = cross_sectional_area
+		self.y_max = y_max
 		self.modulus_elasticity = modulus_elasticity
 		self.connectivity_table = connectivity_table
 		self.nodal_coordinates = nodal_coordinates
@@ -164,7 +158,7 @@ class structure(ABC):
 			
 			# Instantiate an element
 			ele = element(nodei, nodej, self.modulus_elasticity, 
-						  self.inner_diameter, self.outer_diameter)
+						  self.moment_of_inertia, self.cross_sectional_area)
 			ele.id = key
 			self.elements[ele.id] = ele
 			
@@ -345,8 +339,8 @@ class frame(structure):
 			axial_stress = self.modulus_elasticity * (qjx_local - qix_local) / ele.L
 		
 			# Bending stress
-			bending_stress_i = self.modulus_elasticity * self.outer_diameter/2 * ((6/ele.L*(qiy_local-qjy_local))+(2/ele.L*(2*qi_theta+qj_theta)))
-			bending_stress_j = self.modulus_elasticity * self.outer_diameter/2 * ((6/ele.L*(qiy_local-qjy_local))+(2/ele.L*(2*qj_theta+qi_theta)))
+			bending_stress_i = self.modulus_elasticity * self.y_max * ((6/ele.L*(qiy_local-qjy_local))+(2/ele.L*(2*qi_theta+qj_theta)))
+			bending_stress_j = self.modulus_elasticity * self.y_max * ((6/ele.L*(qiy_local-qjy_local))+(2/ele.L*(2*qj_theta+qi_theta)))
 			bending_stress = np.max([bending_stress_i, bending_stress_j])
 			
 			# Shear stress
@@ -426,8 +420,8 @@ class fea():
 	
 	Parameters
 	----------
-	outer_diameter : float [mm]
-	inner_diameter : float [mm]
+	moment_of_inertia : float [mm]
+	cross_sectional_area : float [mm]
 	modulus_elasticity : float [MPa]
 	connectivity_table : dict
 		Dictionary representing the 2 nodes associated with each element {element_id : [nodei_id, nodej_id],...}
@@ -443,12 +437,13 @@ class fea():
 		Specify which type of structure to create
 	'''
 	
-	def __init__(self, outer_diameter, inner_diameter, modulus_elasticity,
-				 connectivity_table, nodal_coordinates,
+	def __init__(self, moment_of_inertia, cross_sectional_area, y_max,
+				 modulus_elasticity, connectivity_table, nodal_coordinates,
 				 boundary_conditions, force_vector, frame_or_truss):
 				 
-		self.outer_diameter = outer_diameter
-		self.inner_diameter = inner_diameter
+		self.moment_of_inertia = moment_of_inertia
+		self.cross_sectional_area = cross_sectional_area
+		self.y_max = y_max
 		self.modulus_elasticity = modulus_elasticity
 		self.connectivity_table = connectivity_table
 		self.nodal_coordinates = nodal_coordinates
@@ -461,9 +456,7 @@ class fea():
 		Validate the input data and return common errors
 		'''
 	
-		if self.inner_diameter >= self.outer_diameter:
-			return "ERROR: inner diameter greater or equal to outer diameter"
-		elif self.frame_or_truss != 'frame' and self.frame_or_truss != 'truss':
+		if self.frame_or_truss != 'frame' and self.frame_or_truss != 'truss':
 			return "ERROR: must specify either frame or truss"
 		elif len(self.boundary_conditions) > len(self.nodal_coordinates)*2 and self.frame_or_truss == 'truss':
 			return "ERROR: too many boundary conditions, maximum: 2*(# of nodes)"
@@ -485,12 +478,12 @@ class fea():
 			return self.data_validate()
 		
 		if self.frame_or_truss == 'frame':
-			self.struc = frame(self.outer_diameter, self.inner_diameter, self.modulus_elasticity,
-							   self.connectivity_table, self.nodal_coordinates,
+			self.struc = frame(self.moment_of_inertia, self.cross_sectional_area, self.y_max,
+							   self.modulus_elasticity, self.connectivity_table, self.nodal_coordinates,
 							   self.boundary_conditions, self.force_vector)
 		elif self.frame_or_truss == 'truss':
-			self.struc = truss(self.outer_diameter, self.inner_diameter, self.modulus_elasticity,
-							   self.connectivity_table, self.nodal_coordinates,
+			self.struc = truss(self.moment_of_inertia, self.cross_sectional_area, self.y_max,
+							   self.modulus_elasticity, self.connectivity_table, self.nodal_coordinates,
 							   self.boundary_conditions, self.force_vector)
 							   
 		self.struc.create_nodes()

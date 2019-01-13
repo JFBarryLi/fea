@@ -17,8 +17,9 @@ def fea_structure_input(request):
 			instance = serializer.save()
 			
 			# Finite element analysis 2D
-			outer_diameter = instance.outer_diameter
-			inner_diameter = instance.inner_diameter
+			moment_of_inertia = instance.moment_of_inertia
+			cross_sectional_area = instance.cross_sectional_area
+			y_max = instance.y_max
 			modulus_elasticity = instance.modulus_elasticity
 			connectivity_table = eval(instance.connectivity_table)
 			nodal_coordinates = eval(instance.nodal_coordinates)
@@ -26,8 +27,8 @@ def fea_structure_input(request):
 			force_vector = eval(instance.force_vector)
 			frame_or_truss = instance.frame_or_truss
 			
-			struc = fea(outer_diameter, inner_diameter, modulus_elasticity,
-						connectivity_table, nodal_coordinates,
+			struc = fea(moment_of_inertia, cross_sectional_area, y_max,
+						modulus_elasticity, connectivity_table, nodal_coordinates,
 						boundary_conditions, force_vector, frame_or_truss)
 			struc.analyze()
 			
