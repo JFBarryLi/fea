@@ -356,8 +356,6 @@ class frame(structure):
 			von_mises_stress = np.sqrt(max_stress**2-max_stress*min_stress+min_stress**2)
 			
 			self.stress[i] = [von_mises_stress]
-	
-		pass
 
 	
 class truss(structure):
@@ -496,6 +494,19 @@ class fea():
 		self.struc.calc_stress()
 		
 		self.new_nodal_coordinates = self.struc.new_nodal_coordinates
+		
+		# Bug with truss, whenever it's a truss analysis, the output is in ndarray
+		if type(self.struc.new_nodal_coordinates[1][0]) == np.ndarray:
+			for i in range(1, len(self.struc.new_nodal_coordinates) + 1):
+				for j in range(0, 2):
+					self.struc.new_nodal_coordinates[i][j] = self.struc.new_nodal_coordinates[i][j].tolist()[0]
+		
+		self.new_nodal_coordinates = self.struc.new_nodal_coordinates
+		
+		if type(self.struc.stress[1]) == np.ndarray:
+			for i in range(1, len(self.struc.stress) + 1):
+				self.struc.stress[i] = self.struc.stress[i].tolist()[0]
+		
 		self.stress = self.struc.stress
 		
 		return 'success'

@@ -564,6 +564,29 @@ class FEA2DTrussTests(TestCase):
 		test_truss.calc_stress()
 		
 		self.assertEqual(round(test_truss.stress[1][0],4), -0.0127)
+		
+	def test_fea_truss_calc_new_nodal_coordinates(self):
+		'''
+		Test the calc_new_nodal_coordinates method
+		'''
+		moment_of_inertia = 10
+		cross_sectional_area = 5
+		y_max = 10
+		modulus_elasticity = 10
+		connectivity_table = {1 : [1, 2], 2 : [2, 3], 3 : [3, 4], 4 : [4, 5]}
+		nodal_coordinates = {1 : [0,0], 2 : [0,1], 3 : [1,2], 4 : [4,5], 5 : [10, 10]}
+		boundary_conditions = [0,1,2]
+		force_vector = [0, 0, 0, 0, -1, 0]
+		
+		test_truss = truss(moment_of_inertia, cross_sectional_area, y_max,
+						   modulus_elasticity, connectivity_table, nodal_coordinates,
+						   boundary_conditions, force_vector)
+		
+		test_truss.Q = np.matrix([1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]).transpose()
+		test_truss.calc_new_nodal_coordinates()
+		
+		self.assertEqual(test_truss.new_nodal_coordinates, {1 : [1,1], 2 : [1,2], 3 : [2,3], 4 : [5,6], 5 : [11, 11]})
+		# self.assertIs(test_truss.Q, 1)
 
 class FEA2DFeaTests(TestCase):		
 	def test_fea_fea_data_validate_force_error(self):
@@ -634,3 +657,4 @@ class FEA2DFeaTests(TestCase):
 		test_fea.analyze()
 		
 		self.assertEqual(round(test_fea.struc.stress[1][0],4), -0.0127)
+		# self.assertIs(test_fea.struc.new_nodal_coordinates, 1)
