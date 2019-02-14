@@ -302,7 +302,7 @@ class frame(structure):
 			nodal_coordinates_list.append(self.nodal_coordinates[key][1])
 			
 		# Deleting every third row, the row that correspond with the rotating DOF
-		disp_without_moment = np.delete(self.Q, self.Q[1::3]).transpose()
+		disp_without_moment = np.array([i for j, i in enumerate(self.Q) if (j+1)%3]).transpose()[0]
 		
 		for i in range(0, len(nodal_coordinates_list)):
 			nodal_coordinates_list[i] = nodal_coordinates_list[i] + disp_without_moment[i] 

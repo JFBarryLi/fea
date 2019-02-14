@@ -38,10 +38,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 		'fea_structure.apps.FeaStructureConfig',
-		'rest_framework'
+		'rest_framework',
+		'corsheaders'
 ]
 
 MIDDLEWARE = [
+		'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -49,6 +51,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+		
 ]
 
 ROOT_URLCONF = 'FEA_WebApp.urls'
@@ -143,3 +146,13 @@ CACHES = {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
     }
 }
+
+CORS_ORIGIN_WHITELIST = (
+    'jfbarryli.github.io',
+		'jfbarryli.github.io/fea',
+    'localhost:8000',
+    '127.0.0.1:8000',
+		'127.0.0.1',
+		'localhost',
+		'localhost:80',
+)
