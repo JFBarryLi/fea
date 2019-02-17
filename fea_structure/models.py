@@ -13,7 +13,7 @@ def gen_id():
 	id = (t << 23 ) | u
 
 	return id
-
+	
 class InputStructure(models.Model):
 	'''
 	Input structure
@@ -21,10 +21,13 @@ class InputStructure(models.Model):
 	
 	id = models.BigIntegerField(default = gen_id, primary_key=True)  
 	created = models.DateTimeField(auto_now_add=True)
-	moment_of_inertia = models.FloatField()
+	moment_of_inertia_y = models.FloatField()
+	moment_of_inertia_z = models.FloatField()
 	cross_sectional_area = models.FloatField()
 	y_max = models.FloatField()
-	modulus_elasticity = models.FloatField()
+	young_modulus = models.FloatField()
+	shear_modulus = models.FloatField()
+	torsional_constant = models.FloatField()
 	connectivity_table = models.TextField()
 	nodal_coordinates = models.TextField()
 	boundary_conditions = models.TextField()

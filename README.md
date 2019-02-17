@@ -17,10 +17,13 @@ Content-Type: application/json
 Content payload example:
 ```bash
 {
-	"moment_of_inertia":"20",
+	"moment_of_inertia_y":"20",
+	"moment_of_inertia_z":"10",
 	"cross_sectional_area":"10",
 	"y_max":"1",
-	"modulus_elasticity":"100",
+	"young_modulus":"100",
+	"shear_modulus":"50",
+	"torsional_constant":"30",
 	"connectivity_table":"{1 : [1, 2]}",
 	"nodal_coordinates":"{1 : [0,0], 2 : [0,1]}",
 	"boundary_conditions":"[ 0, 1, 2]",
@@ -30,11 +33,13 @@ Content payload example:
 ```
 
 Parameters:
-  * moment_of_inertia : float [mm^4]  
+  * moment_of_inertia_y : float [mm^4]  
   * cross_sectional_area : float [mm^2]  
   * y_max : float [mm]
 	+ Distance from neutral axis to surface in the y-direction
-  * modulus_elasticity : float [MPa]  
+  * young_modulus : float [MPa]  
+  * shear_modulus : float [MPa]
+  * torsional_constant : float [mm^4]
   * connectivity_table : dict  
 	+ Dictionary representing the 2 nodes associated with each element  
 	{element_id : [nodei_id, nodej_id],...}  

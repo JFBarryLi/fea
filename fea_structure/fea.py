@@ -1,5 +1,5 @@
 '''
-Finite Element Analysis for 2D frame or Truss
+Truss/Frame Finite Element Analysis
 Author : Barry Li
 '''
 
@@ -15,12 +15,14 @@ class node():
 	id : int
 	x : float
 	y : float
+	z : float
 	'''
 
-	def __init__(self, id, x, y):
+	def __init__(self, id, x, y, z):
 		self.id = id
 		self.x = x
 		self.y = y
+		self.z = z
 
 
 class element():
@@ -35,17 +37,26 @@ class element():
 		Node object, representing node j
 	E : float [MPa]
 		Young's Modulus
-	I : float [mm^4]
-		Area moment of inertia
+	G : float [MPa]
+		Shear modulus
+	J : float [mm^4]
+		Torsional constant
+	Iy : float [mm^4]
+		Area moment of inertia wrt y-axis
+	Iz : float [mm^4]
+		Area moment of inertia wrt z-axis
 	A : float [mm^2]
 		Cross sectional area
 	'''
 	
-	def __init__(self, nodei, nodej, E, I, A):
+	def __init__(self, nodei, nodej, E, G, J, Iy, Iz, A):
 		self.nodei = nodei
 		self.nodej = nodej
 		self.E = E
-		self.I = I
+		self.G = G
+		self.J = J
+		self.Iy = Iy
+		self.Iz = Iz
 		self.A = A
 		
 	def calc_properties(self):
@@ -57,44 +68,109 @@ class element():
 		self.L = np.sqrt((self.nodej.x - self.nodei.x)**2 + 
 						 (self.nodej.y - self.nodei.y)**2)
 		
-		#Cosinex 
-		self.Cx = (self.nodej.x - self.nodei.x) / self.L
+		# Cosine X-x
+		self.Cxx = (self.nodej.x - self.nodei.x) / self.L
 		
-		#Cosiney
-		self.Cy = (self.nodej.y - self.nodei.y) / self.L
+		# Cosine Y-x
+		self.Cyx = (self.nodej.y - self.nodei.y) / self.L
+		
+		# Cosine Z-x
+		self.Czx = (self.nodej.z - self.nodei.z) / self.L
 		
 	def calc_stiffness_frame(self):
 		'''
 		Calculate the stiffness matrix for a frame
 		'''
-		
+		E = self.E
+		A = self.A*self
+		Iy = self.Iy
+		Iz = self.Iz
+		J = self.J
+		G = self.G
+		L = self.L
+
 		# Local Stiffness Matrix
-		self.k_local = np.matrix([[self.A*self.E/self.L, 0, 0, -self.A*self.E/self.L, 0, 0],
-								  [0, 12*self.E*self.I/self.L**3, 6*self.E*self.I/self.L**2, 0, -12*self.E*self.I/self.L**3, 6*self.E*self.I/self.L**2],
-								  [0, 6*self.E*self.I/self.L**2, 4*self.E*self.I/self.L, 0, -6*self.E*self.I/self.L**2, 2*self.E*self.I/self.L],
-								  [-self.A*self.E/self.L, 0, 0, self.A*self.E/self.L, 0, 0],
-								  [0, -12*self.E*self.I/self.L**3, -6*self.E*self.I/self.L**2, 0, 12*self.E*self.I/self.L**3, -6*self.E*self.I/self.L**2],
-								  [0, 6*self.E*self.I/self.L**2, 2*self.E*self.I/self.L, 0, -6*self.E*self.I/self.L**2, 4*self.E*self.I/self.L]])
+		k_local = np.matrix([[E*A/L, 0, 0, 0, 0, 0, -E*A/L, 0, 0, 0, 0, 0],
+						     [0, 12*E*Iz/L**3, 0, 0, 0, 6*E*Iz/L**2, 0, -12*E*Iz/L**3, 0, 0, 0, 6*E*Iz/L**2],
+							 [0, 0, 12*E*Iy/L**3, 0, -6*E*Iy/L**2, 0, 0, 0, -12*E*Iy/L**3, 0, -6*E*Iy/L**2, 0],
+							 [0, 0, 0, G*J/L, 0, 0, 0, 0, 0, -G*J/L, 0, 0],
+							 [0, 0, -6*E*Iy/L**2, 0,4*E*Iy/L, 0, 0, 0, 6*E*Iy/L**2, 0, 2*E*Iy/L, 0],
+							 [0, 6*E*Iz/L**2, 0, 0, 0, 4*E*Iz/L, 0, -6*E*Iz/L**2, 0, 0, 0, 2*E*Iz/L],
+							 [-E*A/L, 0, 0, 0, 0, 0, E*A/L, 0, 0, 0, 0, 0],
+							 [0, -12*E*Iz/L**3, 0, 0, 0, -6*E*Iz/L**2, 0, 12*E*Iz/L**3, 0, 0, 0, -6*E*Iz/L**2],
+							 [0, 0, -12*E*Iy/L**3, 0, 6*E*Iy/L**2, 0, 0, 0, 12*E*Iy/L**3, 0, 6*E*Iy/L**2, 0],
+							 [0, 0, 0, -G*J/L, 0, 0, 0, 0, 0, G*J/L, 0, 0],
+							 [0, 0, -6*E*Iy/L**2, 0, 2*E*Iy/L, 0, 0, 0, 6*E*Iy/L**2, 0, 4*E*Iy/L, 0],
+							 [0, 6*E*Iz/L**2, 0, 0, 0, 2*E*Iz/L, 0, -6*E*Iz/L**2, 0, 0, 0, 4*E*Iz/L]])
+		
+		# Coordinate Transformation; local to global
+		if self.nodei.x == self.nodej.x and self.nodei.y == self.nodej.y:
+			if self.nodej.z > self.nodei.z:
+				Lambda = np.matrix([[0, 0, 1],
+									[0, 1, 0],
+									[-1, 0, 0]])
+			else:
+				Lambda = np.matrix([[0, 0, -1],
+									[0, 1, 0],
+									[1, 0, 0]])
+		else:
+			Cxx = self.Cxx
+			Cyx = self.Cyx
+			Czx = self.Czx
+			
+			# Magnitude of Cxx and Cyx
+			d = np.sqrt(self.Cxx**2 + self.Cyx**2)
+			
+			# Cosine X-y
+			Cxy = -Cyx/d
+			
+			# Cosine Y-y
+			Cyy = Cxx/d
+			
+			# Cosine Z-y
+			Czy = 0
+			
+			# Cosine X-z
+			Cxz = -Cxx*Czx/d
+			
+			# Cosine Y-z
+			Cyz = -Cyx*Czx/d
+			
+			# Cosine Z-z
+			Czz = d
+			
+			Lambda = np.matrix([[Cxx, Cyx, Czx],
+								[Cxy, Cyy, Czy],
+								[Cxz, Cyz, Czz]])
 		
 		# Local to Global Coordinate Transformation Matrix
-		self.R = np.matrix([[self.Cx, -self.Cy, 0, 0, 0, 0],
-							[self.Cy, self.Cx, 0, 0, 0, 0],
-							[0, 0, 1, 0, 0, 0],
-							[0, 0, 0, self.Cx, -self.Cy, 0],
-							[0, 0, 0, self.Cy, self.Cx, 0],
-							[0, 0, 0, 0, 0, 1]])
+		R = np.block([
+			[Lambda,          np.zeros((3,3)), np.zeros((3,3)), np.zeros((3,3))],
+			[np.zeros((3,3)), Lambda,          np.zeros((3,3)), np.zeros((3,3))],
+			[np.zeros((3,3)), np.zeros((3,3)), Lambda,          np.zeros((3,3))],
+			[np.zeros((3,3)), np.zeros((3,3)), np.zeros((3,3)), Lambda         ]
+		])
 		
 		# Global Stiffness Matrix
-		self.K = self.R.transpose() * self.k_local * self.R;
+		self.K = R.transpose() * k_local * R
 
 
 		
 	def calc_stiffness_truss(self):
+		E = self.E
+		A = self.A*self.A
+		L = self.L
+		Cx = self.Cxx
+		Cy = self.Cyx
+		Cz = self.Czx
+		
 		# Global Stiffness Matrix
-		self.K = self.E*self.A/self.L * np.matrix([[self.Cx**2, self.Cx*self.Cy, -self.Cx**2, -self.Cx*self.Cy],
-												   [self.Cx*self.Cy, self.Cy**2, -self.Cx*self.Cy, -self.Cy**2],
-												   [-self.Cx**2, -self.Cx*self.Cy, self.Cx**2, self.Cx*self.Cy],
-												   [-self.Cx*self.Cy, -self.Cy**2, self.Cx*self.Cy, self.Cy**2]])
+		self.K = E*A/L * np.matrix([[Cx**2, Cx*Cy, Cx*Cz, -Cx**2, -Cx*Cy, -Cx*Cz],
+								    [Cx*Cy, Cy**2, Cy*Cz, -Cx*Cy, -Cy**2, -Cy*Cz],
+								    [Cx*Cz, Cy*Cz, Cz**2, -Cx*Cz, -Cy*Cz, -Cz**2],
+								    [-Cx**2, -Cx*Cy, -Cx*Cz, Cx**2, Cx*Cy, Cx*Cz],
+								    [-Cx*Cy, -Cy**2, -Cy*Cz, Cx*Cy, Cy**2, Cy*Cz],
+								    [-Cx*Cz, -Cy*Cz, -Cz**2, Cx*Cz, Cy*Cz, Cz**2]])
 	
 class structure(ABC):
 	'''
@@ -102,11 +178,14 @@ class structure(ABC):
 	
 	Parameters
 	----------
-	moment_of_inertia : float [mm^4]
+	moment_of_inertia_y : float [mm^4]
+	moment_of_inertia_z : float [mm^4]
 	cross_sectional_area : float [mm^2]
 	y_max : float [mm]
 		Max distance from neutral axis to the surface in the y-direction
-	modulus_elasticity : float [MPa]
+	young_modulus : float [MPa]
+	shear_modulus : float [MPa]
+	torsional_constant : float [mm^4]
 	connectivity_table : dict
 		Dictionary representing the 2 nodes associated with each element {element_id : [nodei_id, nodej_id],...}
 	nodal_coordinates : dict
@@ -120,14 +199,17 @@ class structure(ABC):
 	'''
 	
 	@abstractmethod
-	def __init__(self, moment_of_inertia, cross_sectional_area, 
-				 y_max, modulus_elasticity, connectivity_table, 
+	def __init__(self, moment_of_inertia_y, moment_of_inertia_z, cross_sectional_area, 
+				 y_max, young_modulus, shear_modulus, torsional_constant, connectivity_table, 
 				 nodal_coordinates, boundary_conditions, force_vector):
 				 
-		self.moment_of_inertia = moment_of_inertia
+		self.moment_of_inertia_y = moment_of_inertia_y
+		self.moment_of_inertia_z = moment_of_inertia_z
 		self.cross_sectional_area = cross_sectional_area
 		self.y_max = y_max
-		self.modulus_elasticity = modulus_elasticity
+		self.young_modulus = young_modulus
+		self.shear_modulus = shear_modulus
+		self.torsional_constant = torsional_constant
 		self.connectivity_table = connectivity_table
 		self.nodal_coordinates = nodal_coordinates
 		self.boundary_conditions = boundary_conditions
@@ -157,8 +239,9 @@ class structure(ABC):
 			nodej = self.nodes[self.connectivity_table[key][1]]
 			
 			# Instantiate an element
-			ele = element(nodei, nodej, self.modulus_elasticity, 
-						  self.moment_of_inertia, self.cross_sectional_area)
+			ele = element(nodei, nodej, self.young_modulus, self.shear_modulus,
+						  self.torsional_constant, self.moment_of_inertia_y, 
+						  self.moment_of_inertia_z, self.cross_sectional_area)
 			ele.id = key
 			self.elements[ele.id] = ele
 			
@@ -280,7 +363,7 @@ class frame(structure):
 	
 	def __init__(self, *args, **kwargs):
 		super(frame, self).__init__(*args, **kwargs)
-		self.DOF = 3
+		self.DOF = 6
 	
 	def calc_stiffness(self):
 		'''
@@ -365,7 +448,7 @@ class truss(structure):
 	
 	def __init__(self, *args, **kwargs):
 		super(truss, self).__init__(*args, **kwargs)
-		self.DOF = 2
+		self.DOF = 3
 
 	def calc_stiffness(self):
 		'''
@@ -418,9 +501,12 @@ class fea():
 	
 	Parameters
 	----------
-	moment_of_inertia : float [mm]
+	moment_of_inertia_y : float [mm]
+	moment_of_inertia_z : float [mm]
 	cross_sectional_area : float [mm]
-	modulus_elasticity : float [MPa]
+	young_modulus : float [MPa]
+	shear_modulus : float [MPa]
+	torsional_constant : float [mm^4]
 	connectivity_table : dict
 		Dictionary representing the 2 nodes associated with each element {element_id : [nodei_id, nodej_id],...}
 	nodal_coordinates : dict
@@ -435,14 +521,18 @@ class fea():
 		Specify which type of structure to create
 	'''
 	
-	def __init__(self, moment_of_inertia, cross_sectional_area, y_max,
-				 modulus_elasticity, connectivity_table, nodal_coordinates,
-				 boundary_conditions, force_vector, frame_or_truss):
+	def __init__(self, moment_of_inertia_y, moment_of_inertia_z, 
+				 cross_sectional_area, y_max, young_modulus,
+				 shear_modulus, torsional_constant, connectivity_table, 
+				 nodal_coordinates, boundary_conditions, force_vector, frame_or_truss):
 				 
-		self.moment_of_inertia = moment_of_inertia
+		self.moment_of_inertia_y = moment_of_inertia_y
+		self.moment_of_inertia_z = moment_of_inertia_z
 		self.cross_sectional_area = cross_sectional_area
 		self.y_max = y_max
-		self.modulus_elasticity = modulus_elasticity
+		self.young_modulus = young_modulus
+		self.shear_modulus = shear_modulus
+		self.torsional_constant = torsional_constant
 		self.connectivity_table = connectivity_table
 		self.nodal_coordinates = nodal_coordinates
 		self.boundary_conditions = boundary_conditions
@@ -476,13 +566,13 @@ class fea():
 			return self.data_validate()
 		
 		if self.frame_or_truss == 'frame':
-			self.struc = frame(self.moment_of_inertia, self.cross_sectional_area, self.y_max,
-							   self.modulus_elasticity, self.connectivity_table, self.nodal_coordinates,
-							   self.boundary_conditions, self.force_vector)
+			self.struc = frame(self.moment_of_inertia_y, self.moment_of_inertia_z, self.cross_sectional_area, self.y_max,
+							   self.young_modulus, self.shear_modulus, self.torsional_constant, self.connectivity_table,
+							   self.nodal_coordinates, self.boundary_conditions, self.force_vector)
 		elif self.frame_or_truss == 'truss':
-			self.struc = truss(self.moment_of_inertia, self.cross_sectional_area, self.y_max,
-							   self.modulus_elasticity, self.connectivity_table, self.nodal_coordinates,
-							   self.boundary_conditions, self.force_vector)
+			self.struc = truss(self.moment_of_inertia_y, self.moment_of_inertia_z, self.cross_sectional_area, self.y_max,
+							   self.young_modulus, self.shear_modulus, self.torsional_constant, self.connectivity_table,
+							   self.nodal_coordinates, self.boundary_conditions, self.force_vector)
 							   
 		self.struc.create_nodes()
 		self.struc.create_elements()

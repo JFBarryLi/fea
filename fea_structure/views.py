@@ -17,18 +17,21 @@ def fea_structure_input(request):
 			instance = serializer.save()
 			
 			# Finite element analysis 2D
-			moment_of_inertia = instance.moment_of_inertia
+			moment_of_inertia_y = instance.moment_of_inertia_y
+			moment_of_inertia_z = instance.moment_of_inertia_z
 			cross_sectional_area = instance.cross_sectional_area
 			y_max = instance.y_max
-			modulus_elasticity = instance.modulus_elasticity
+			young_modulus = instance.young_modulus
+			shear_modulus = instance.shear_modulus
+			torsional_constant = instance.torsional_constant
 			connectivity_table = eval(instance.connectivity_table)
 			nodal_coordinates = eval(instance.nodal_coordinates)
 			boundary_conditions = eval(instance.boundary_conditions)
 			force_vector = eval(instance.force_vector)
 			frame_or_truss = instance.frame_or_truss
 			
-			struc = fea(moment_of_inertia, cross_sectional_area, y_max,
-						modulus_elasticity, connectivity_table, nodal_coordinates,
+			struc = fea(moment_of_inertia_y, moment_of_inertia_z, cross_sectional_area, y_max,
+						young_modulus, shear_modulus, torsional_constant, connectivity_table, nodal_coordinates,
 						boundary_conditions, force_vector, frame_or_truss)
 			struc.analyze()
 			
