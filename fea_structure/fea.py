@@ -1,5 +1,6 @@
 '''
 Truss/Frame Finite Element Analysis
+TODO: STRESSES
 Author : Barry Li
 '''
 
@@ -66,7 +67,8 @@ class element():
 		
 		# Length [mm]
 		self.L = np.sqrt((self.nodej.x - self.nodei.x)**2 + 
-						 (self.nodej.y - self.nodei.y)**2)
+						 (self.nodej.y - self.nodei.y)**2 +
+						 (self.nodej.z - self.nodei.z)**2)
 		
 		# Cosine X-x
 		self.Cxx = (self.nodej.x - self.nodei.x) / self.L
@@ -82,7 +84,7 @@ class element():
 		Calculate the stiffness matrix for a frame
 		'''
 		E = self.E
-		A = self.A*self
+		A = self.A
 		Iy = self.Iy
 		Iz = self.Iz
 		J = self.J
@@ -225,7 +227,7 @@ class structure(ABC):
 		'''
 		
 		for key in self.nodal_coordinates:
-			n = node(key, self.nodal_coordinates[key][0], self.nodal_coordinates[key][1])
+			n = node(key, self.nodal_coordinates[key][0], self.nodal_coordinates[key][1], self.nodal_coordinates[key][2])
 			self.nodes[n.id] = n
 		
 	def create_elements(self):
@@ -275,8 +277,8 @@ class structure(ABC):
 			nodej_id = ele.nodej.id
 			
 			# Quadrant 1 
-			# for frame; row:[ix,iy,itheta] col:[ix,iy,itheta]
-			# for truss; row:[ix,iy] col:[ix,iy]
+			# for frame; row:[ix,iy,iz,ixtheta,iytheta,iztheta] col:[ix,iy,iz,ixtheta,iytheta,iztheta]
+			# for truss; row:[ix,iy,iz] col:[ix,iy,iz]
 			for j in range(0,DOF):
 				for k in range(0,DOF):
 					self.assemblage[DOF*nodei_id - DOF + j, DOF*nodei_id - DOF + k] = \
@@ -284,8 +286,8 @@ class structure(ABC):
 					ele.K[j,k]
 
 			# Quadrant 2 
-			# for frame; row:[ix,iy,itheta] col:[jx,jy,jz,jtheta]
-			# for truss; row:[ix,iy,itheta] col:[jx,jy,jz,jtheta]
+			# for frame; row:[ix,iy,iz,ixtheta,iytheta,iztheta] col:[jx,jy,jz,jxtheta,jytheta,jztheta]
+			# for truss; row:[ix,iy,iz] col:[jx,jy,jz]
 			for j in range(0,DOF):
 				for k in range(0,DOF):
 					self.assemblage[DOF*nodei_id - DOF + j, DOF*nodej_id - DOF + k] = \
@@ -293,8 +295,8 @@ class structure(ABC):
 					ele.K[j,k+DOF]
 
 			# Quadrant 3 
-			# for frame; row:[jx,jy,jz,itheta] col:[ix,iy,jtheta]
-			# for truss; row:[jx,jy,jz,itheta] col:[ix,iy,jtheta]
+			# for frame; row:[jx,jy,jz,ixtheta,iytheta,iztheta] col:[ix,iy,iz,ixtheta,iytheta,iztheta]
+			# for truss; row:[jx,jy,jz] col:[ix,iy,iz]
 			for j in range(0,DOF):
 				for k in range(0,DOF):
 					self.assemblage[DOF*nodej_id - DOF + j, DOF*nodei_id - DOF + k] = \
@@ -302,8 +304,8 @@ class structure(ABC):
 					ele.K[j+DOF,k]
 					
 			# Quadrant 4 
-			# for frame; row:[jx,jy,jz,itheta] col:[jx,jy,jz,jtheta]
-			# for truss; row:[jx,jy,jz,itheta] col:[jx,jy,jz,jtheta]
+			# for frame; row:[jx,jy,jz,jxtheta,jytheta,jztheta] col:[jx,jy,jz,jxtheta,jytheta,jztheta]
+			# for truss; row:[jx,jy,jz] col:[jx,jy,jz]
 			for j in range(0,DOF):
 				for k in range(0,DOF):
 					self.assemblage[DOF*nodej_id - DOF + j, DOF*nodej_id - DOF + k] = \
@@ -383,20 +385,26 @@ class frame(structure):
 		for key in sorted(self.nodal_coordinates.keys()):
 			nodal_coordinates_list.append(self.nodal_coordinates[key][0])
 			nodal_coordinates_list.append(self.nodal_coordinates[key][1])
+			nodal_coordinates_list.append(self.nodal_coordinates[key][2])
 			
-		# Deleting every third row, the row that correspond with the rotating DOF
-		disp_without_moment = np.array([i for j, i in enumerate(self.Q) if (j+1)%3]).transpose()[0]
+		# Deleting every fourth,fifth, and sixth rows, the rows that correspond with the rotating DOF
+		rotatez = list(range(5,self.Q.shape[0],6))
+		rotatey = [i-1 for i in rotatez]
+		rotatex = [i-2 for i in rotatez]
+		rotate = [*rotatex, *rotatey, *rotatez]
+		
+		disp_without_moment = np.delete(self.Q, rotate, axis=0).transpose()[0]			
 		
 		for i in range(0, len(nodal_coordinates_list)):
 			nodal_coordinates_list[i] = nodal_coordinates_list[i] + disp_without_moment[i] 
 
 		# Constructing the new_nodal_coordinates dictionary
-		for i in range(1, int(len(nodal_coordinates_list)/2+1)):
-			self.new_nodal_coordinates[i] = [nodal_coordinates_list[2*i-2], nodal_coordinates_list[2*i-1]]
+		for i in range(1, int(len(nodal_coordinates_list)/3+1)):
+			self.new_nodal_coordinates[i] = [nodal_coordinates_list[3*i-3], nodal_coordinates_list[3*i-2], nodal_coordinates_list[3*i-1]]
 		
 	def calc_stress(self):
 		'''
-		Calculate stress in each member
+		Calculate stress in each member   !!!INCOMPLETE NOT READY FOR 3D!!!
 		'''
 	
 		for i in range(1, int(len(self.elements) + 1)):
@@ -410,24 +418,24 @@ class frame(structure):
 			
 			
 			# Displacements in Local Coordinates
-			qix_local = qix * ele.Cx + qiy * ele.Cy
-			qjx_local = qjx * ele.Cx + qjy * ele.Cy
+			qix_local = qix * ele.Cxx + qiy * ele.Cyx
+			qjx_local = qjx * ele.Cxx + qjy * ele.Cyx
 			
-			qiy_local = qix * -ele.Cy + qiy * ele.Cx
-			qjy_local = qjx * -ele.Cy + qjy * ele.Cx
+			qiy_local = qix * -ele.Cyx + qiy * ele.Cxx
+			qjy_local = qjx * -ele.Cyx + qjy * ele.Cxx
 			qi_theta = self.Q[ele.nodei.id * 3 - 1]
 			qj_theta = self.Q[ele.nodej.id * 3 - 1]
 			
 			# Axial stress
-			axial_stress = self.modulus_elasticity * (qjx_local - qix_local) / ele.L
+			axial_stress = self.young_modulus * (qjx_local - qix_local) / ele.L
 		
 			# Bending stress
-			bending_stress_i = self.modulus_elasticity * self.y_max * ((6/ele.L*(qiy_local-qjy_local))+(2/ele.L*(2*qi_theta+qj_theta)))
-			bending_stress_j = self.modulus_elasticity * self.y_max * ((6/ele.L*(qiy_local-qjy_local))+(2/ele.L*(2*qj_theta+qi_theta)))
+			bending_stress_i = self.young_modulus * self.y_max * ((6/ele.L*(qiy_local-qjy_local))+(2/ele.L*(2*qi_theta+qj_theta)))
+			bending_stress_j = self.young_modulus * self.y_max * ((6/ele.L*(qiy_local-qjy_local))+(2/ele.L*(2*qj_theta+qi_theta)))
 			bending_stress = np.max([bending_stress_i, bending_stress_j])
 			
 			# Shear stress
-			shear_stress = self.modulus_elasticity * ele.I * ((12/ele.L**3)*(qiy_local-qjy_local)+(6/ele.L**2)*(qi_theta+qj_theta))
+			shear_stress = self.young_modulus * ele.Iy * ((12/ele.L**3)*(qiy_local-qjy_local)+(6/ele.L**2)*(qi_theta+qj_theta))
 			
 			# Principal stress
 			principal_stress_1 = (axial_stress + bending_stress)/2 + np.sqrt(((axial_stress-bending_stress)/2)**2+shear_stress**2)
@@ -468,13 +476,14 @@ class truss(structure):
 		for key in sorted(self.nodal_coordinates.keys()):
 			nodal_coordinates_list.append(self.nodal_coordinates[key][0])
 			nodal_coordinates_list.append(self.nodal_coordinates[key][1])
+			nodal_coordinates_list.append(self.nodal_coordinates[key][2])
 			
 		for i in range(0, len(nodal_coordinates_list)):
 			nodal_coordinates_list[i] = nodal_coordinates_list[i] + self.Q[i] 
 
 		# Constructing the new_nodal_coordinates dictionary
-		for i in range(1, int(len(nodal_coordinates_list)/2+1)):
-			self.new_nodal_coordinates[i] = [nodal_coordinates_list[2*i-2], nodal_coordinates_list[2*i-1]]
+		for i in range(1, int(len(nodal_coordinates_list)/3+1)):
+			self.new_nodal_coordinates[i] = [nodal_coordinates_list[3*i-3], nodal_coordinates_list[3*i-2], nodal_coordinates_list[3*i-1]]
 	
 	def calc_stress(self):
 		'''
@@ -547,13 +556,13 @@ class fea():
 		if self.frame_or_truss != 'frame' and self.frame_or_truss != 'truss':
 			return "ERROR: must specify either frame or truss"
 		elif len(self.boundary_conditions) > len(self.nodal_coordinates)*2 and self.frame_or_truss == 'truss':
-			return "ERROR: too many boundary conditions, maximum: 2*(# of nodes)"
-		elif len(self.boundary_conditions) > len(self.nodal_coordinates)*3 and self.frame_or_truss == 'frame':
 			return "ERROR: too many boundary conditions, maximum: 3*(# of nodes)"
+		elif len(self.boundary_conditions) > len(self.nodal_coordinates)*3 and self.frame_or_truss == 'frame':
+			return "ERROR: too many boundary conditions, maximum: 6*(# of nodes)"
 		elif len(self.force_vector) < len(self.nodal_coordinates)*2 and self.frame_or_truss == 'truss':
-			return "ERROR: size of force vector vector too small, require 2*(# of nodes)"
+			return "ERROR: size of force vector vector too small, require 3*(# of nodes)"
 		elif len(self.force_vector) < len(self.nodal_coordinates)*3 and self.frame_or_truss == 'frame':
-			return "ERROR: size of force vector too small, require 3*(# of nodes)"
+			return "ERROR: size of force vector too small, require 6*(# of nodes)"
 		else:
 			return True
 	

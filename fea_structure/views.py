@@ -16,7 +16,7 @@ def fea_structure_input(request):
 		if serializer.is_valid():
 			instance = serializer.save()
 			
-			# Finite element analysis 2D
+			# Structural finite element analysis
 			moment_of_inertia_y = instance.moment_of_inertia_y
 			moment_of_inertia_z = instance.moment_of_inertia_z
 			cross_sectional_area = instance.cross_sectional_area

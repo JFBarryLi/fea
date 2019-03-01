@@ -123,33 +123,33 @@ class OutputStructureSerializerTests(TestCase):
 		
 		self.assertEqual(serializer.data, {'nodal_coordinates': 'test123', 'stress': 'test123'})
 			
-# class FeaStructureInputViewTests(TestCase):		
-	# def test_Json_input_object(self):
-		# '''
-		# Check for a valid status given valid data
-		# '''
+class FeaStructureInputViewTests(TestCase):		
+	def test_Json_input_object(self):
+		'''
+		Check for a valid status given valid data
+		'''
 		
-		# factory = APIRequestFactory()
+		factory = APIRequestFactory()
 		
-		# data = {
-			# "moment_of_inertia_y":"7363.1078",
-			# "moment_of_inertia_z":"7363.1078",
-			# "cross_sectional_area":"235.619",
-			# "y_max":"10",
-			# "young_modulus":"100",
-			# "shear_modulus":"100",
-			# "torsional_constant":"100",
-			# "connectivity_table":"{1 : [1, 2]}",
-			# "nodal_coordinates":"{1 : [0,0], 2 : [0,1]}",
-			# "boundary_conditions":"[ 0, 1, 2]",
-			# "force_vector":"[0, 0, 0, 0, -1, 0]",
-			# "frame_or_truss":"frame"
-		# }
-		# request = factory.post('input/',data, format='json')
-		# view = fea_structure_input
-		# response = view(request)
+		data = {
+			"moment_of_inertia_y":"100.1078",
+			"moment_of_inertia_z":"150.1078",
+			"cross_sectional_area":"5.619",
+			"y_max":"2",
+			"young_modulus":"10",
+			"shear_modulus":"10",
+			"torsional_constant":"10",
+			"connectivity_table":"{1 : [1, 2]}",
+			"nodal_coordinates":"{1 : [0,0,0], 2 : [0,1,1]}",
+			"boundary_conditions":"[ 0, 1, 2]",
+			"force_vector":"[0, 0, 0, 0, 0, 0, 0, -1000, 0, 0, 0, 0]",
+			"frame_or_truss":"frame"
+		}
+		request = factory.post('input/',data, format='json')
+		view = fea_structure_input
+		response = view(request)
 		
-		# self.assertEqual(response.status_code, 201)
+		self.assertEqual(response.status_code, 201)
 		
 class FEA2DOutputViewTests(TestCase):				
 	def test_json_output_object(self):
@@ -215,10 +215,10 @@ class FeaStructureElementTests(TestCase):
 		
 	# def test_fea_element_calc_stiffness_frame_general(self):
 		# '''
-		# Test the calculation of the stiffness matrix for a frame
+		# Test the calculation of the stiffness matrix general case for a frame
 		# '''
-		# nodei = node(1, 0, 0)
-		# nodej = node(2, 0, 10)
+		# nodei = node(1, 0, 0, 0)
+		# nodej = node(2, 0, 10, 0)
 		# test_element = element(nodei, nodej, 10, 10, 1)
 		# test_element.calc_stiffness_frame()
 		
@@ -262,100 +262,115 @@ class FeaStructureElementTests(TestCase):
 		self.assertEqual(equal, True)
 
 	
-# class FeaStructureFrameTests(TestCase):
-	# def test_fea_structure_creation(self):
-		# '''
-		# Test the creation of the frame object
-		# '''
-		# moment_of_inertia = 10
-		# cross_sectional_area = 5
-		# y_max = 10
-		# modulus_elasticity = 10
-		# connectivity_table = {1 : [1, 2], 2 : [2, 3]}
-		# nodal_coordinates = {1 : [0,0], 2 : [0,1], 3 : [10,10]}
-		# boundary_conditions = [1,2,3]
-		# force_vector = [0, 0, 0, 0, -1, 0]
+class FeaStructureFrameTests(TestCase):
+	def test_fea_structure_creation(self):
+		'''
+		Test the creation of the frame object
+		'''
+		moment_of_inertia_y = 10
+		moment_of_inertia_z = 11
+		cross_sectional_area = 5
+		y_max = 10
+		young_modulus = 10
+		shear_modulus = 11
+		torsional_constant = 12
+		connectivity_table = {1 : [1, 2], 2 : [2, 3]}
+		nodal_coordinates = {1 : [0,0,0], 2 : [0,1,1], 3 : [10,10,10]}
+		boundary_conditions = [1,2,3]
+		force_vector = [0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0]
 		
-		# test_frame = frame(moment_of_inertia, cross_sectional_area, y_max,
-						   # modulus_elasticity, connectivity_table, nodal_coordinates,
-						   # boundary_conditions, force_vector)
+		test_frame = frame(moment_of_inertia_y, moment_of_inertia_z, cross_sectional_area, 
+						   y_max, young_modulus, shear_modulus, torsional_constant, 
+						   connectivity_table, nodal_coordinates, boundary_conditions, force_vector)
 						   
-		# self.assertEqual(test_frame.moment_of_inertia, 10)
-		# self.assertEqual(test_frame.cross_sectional_area, 5)
-		# self.assertEqual(test_frame.y_max, 10)
-		# self.assertEqual(test_frame.modulus_elasticity, 10)
-		# self.assertEqual(test_frame.connectivity_table, {1 : [1, 2], 2 : [2, 3]})
-		# self.assertEqual(test_frame.nodal_coordinates, {1 : [0,0], 2 : [0,1], 3 : [10,10]})
-		# self.assertEqual(test_frame.boundary_conditions, [1,2,3])
-		# self.assertEqual(test_frame.force_vector, [0, 0, 0, 0, -1, 0])
+		self.assertEqual(test_frame.moment_of_inertia_y, 10)
+		self.assertEqual(test_frame.moment_of_inertia_z, 11)
+		self.assertEqual(test_frame.cross_sectional_area, 5)
+		self.assertEqual(test_frame.y_max, 10)
+		self.assertEqual(test_frame.young_modulus, 10)
+		self.assertEqual(test_frame.shear_modulus, 11)
+		self.assertEqual(test_frame.torsional_constant, 12)
+		self.assertEqual(test_frame.connectivity_table, {1 : [1, 2], 2 : [2, 3]})
+		self.assertEqual(test_frame.nodal_coordinates, {1 : [0,0,0], 2 : [0,1,1], 3 : [10,10,10]})
+		self.assertEqual(test_frame.boundary_conditions, [1,2,3])
+		self.assertEqual(test_frame.force_vector, [0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0])
 		
-	# def test_fea_frame_node_creation(self):
-		# '''
-		# Test the creation of nodes from the nodal_coordinates
-		# '''
-		# moment_of_inertia = 10
-		# cross_sectional_area = 5
-		# y_max = 10
-		# modulus_elasticity = 10
-		# connectivity_table = {1 : [1, 2], 2 : [2, 3]}
-		# nodal_coordinates = {1 : [0,0], 2 : [0,1], 3 : [10,10]}
-		# boundary_conditions = [1,2,3]
-		# force_vector = [0, 0, 0, 0, -1, 0]
+	def test_fea_frame_node_creation(self):
+		'''
+		Test the creation of nodes from the nodal_coordinates
+		'''
+		moment_of_inertia_y = 10
+		moment_of_inertia_z = 11
+		cross_sectional_area = 5
+		y_max = 10
+		young_modulus = 10
+		shear_modulus = 11
+		torsional_constant = 12
+		connectivity_table = {1 : [1, 2], 2 : [2, 3]}
+		nodal_coordinates = {1 : [0,0,0], 2 : [0,1,1], 3 : [10,10,10]}
+		boundary_conditions = [1,2,3]
+		force_vector = [0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0]
 		
-		# test_frame = frame(moment_of_inertia, cross_sectional_area, y_max, 
-						   # modulus_elasticity, connectivity_table, nodal_coordinates,
-						   # boundary_conditions, force_vector)
+		test_frame = frame(moment_of_inertia_y, moment_of_inertia_z, cross_sectional_area, 
+						   y_max, young_modulus, shear_modulus, torsional_constant, 
+						   connectivity_table, nodal_coordinates, boundary_conditions, force_vector)
 		
-		# test_frame.create_nodes()
+		test_frame.create_nodes()
 		
-		# self.assertEqual([test_frame.nodes[2].id,test_frame.nodes[2].x,test_frame.nodes[2].y], [2,0,1])
+		self.assertEqual([test_frame.nodes[2].id,test_frame.nodes[2].x,test_frame.nodes[2].y,test_frame.nodes[2].z], [2,0,1,1])
 		
-	# def test_fea_frame_element_creation(self):
-		# '''
-		# Test the creation of elements from the connectivity_table
-		# '''
-		# moment_of_inertia = 10
-		# cross_sectional_area = 5
-		# y_max = 10
-		# modulus_elasticity = 10
-		# connectivity_table = {1 : [1, 2], 2 : [2, 3]}
-		# nodal_coordinates = {1 : [0,0], 2 : [0,1], 3 : [10,10]}
-		# boundary_conditions = [1,2,3]
-		# force_vector = [0, 0, 0, 0, -1, 0]
+	def test_fea_frame_element_creation(self):
+		'''
+		Test the creation of elements from the connectivity_table
+		'''
+		moment_of_inertia_y = 10
+		moment_of_inertia_z = 11
+		cross_sectional_area = 5
+		y_max = 10
+		young_modulus = 10
+		shear_modulus = 11
+		torsional_constant = 12
+		connectivity_table = {1 : [1, 2], 2 : [2, 3]}
+		nodal_coordinates = {1 : [0,0,0], 2 : [0,1,1], 3 : [10,10,10]}
+		boundary_conditions = [1,2,3]
+		force_vector = [0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0]
 		
-		# test_frame = frame(moment_of_inertia, cross_sectional_area, y_max, 
-						   # modulus_elasticity, connectivity_table, nodal_coordinates,
-						   # boundary_conditions, force_vector)
+		test_frame = frame(moment_of_inertia_y, moment_of_inertia_z, cross_sectional_area, 
+						   y_max, young_modulus, shear_modulus, torsional_constant, 
+						   connectivity_table, nodal_coordinates, boundary_conditions, force_vector)
+		test_frame.create_nodes()
+		test_frame.create_elements()
 		
-		# test_frame.create_nodes()
-		# test_frame.create_elements()
+		self.assertEqual([test_frame.elements[2].nodei.x, test_frame.elements[2].nodei.y, test_frame.elements[2].nodei.z], [0, 1, 1])
 		
-		# self.assertEqual([test_frame.elements[2].nodei.x, test_frame.elements[2].nodei.y], [0, 1])
+	def test_fea_frame_element_calc_properties(self):
+		'''
+		Test the calc_properties method of each element
+		'''
+		moment_of_inertia_y = 10
+		moment_of_inertia_z = 11
+		cross_sectional_area = 5
+		y_max = 10
+		young_modulus = 10
+		shear_modulus = 11
+		torsional_constant = 12
+		connectivity_table = {1 : [1, 2], 2 : [2, 3]}
+		nodal_coordinates = {1 : [0,0,0], 2 : [0,0,1], 3 : [10,10,10]}
+		boundary_conditions = [1,2,3]
+		force_vector = [0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0]
 		
-	# def test_fea_frame_element_calc_properties(self):
-		# '''
-		# Test the calc_properties method of each element
-		# '''
-		# moment_of_inertia = 10
-		# cross_sectional_area = 5
-		# y_max = 10
-		# modulus_elasticity = 10
-		# connectivity_table = {1 : [1, 2], 2 : [2, 3]}
-		# nodal_coordinates = {1 : [0,0], 2 : [0,1], 3 : [10,10]}
-		# boundary_conditions = [1,2,3]
-		# force_vector = [0, 0, 0, 0, -1, 0]
+		test_frame = frame(moment_of_inertia_y, moment_of_inertia_z, cross_sectional_area, 
+						   y_max, young_modulus, shear_modulus, torsional_constant, 
+						   connectivity_table, nodal_coordinates, boundary_conditions, force_vector)
 		
-		# test_frame = frame(moment_of_inertia, cross_sectional_area, y_max, 
-						   # modulus_elasticity, connectivity_table, nodal_coordinates,
-						   # boundary_conditions, force_vector)
+		test_frame.create_nodes()
+		test_frame.create_elements()
+		test_frame.calc_properties()
 		
-		# test_frame.create_nodes()
-		# test_frame.create_elements()
-		# test_frame.calc_properties()
-		
-		# self.assertEqual(test_frame.elements[1].L, 1)
-		# self.assertEqual(test_frame.elements[1].Cx, 0)
-		# self.assertEqual(test_frame.elements[1].Cy, 1)
+		self.assertEqual(test_frame.elements[1].L, 1)
+		self.assertEqual(test_frame.elements[1].Cxx, 0)
+		self.assertEqual(test_frame.elements[1].Cyx, 0)
+		self.assertEqual(test_frame.elements[1].Czx, 1)
 
 	# def test_fea_frame_element_calc_stiffness(self):
 		# '''
@@ -429,52 +444,57 @@ class FeaStructureElementTests(TestCase):
 
 		# self.assertEqual(equal, True)
 		
-	# def test_fea_frame_calc_displacement(self):
-		# '''
-		# Test the calc_displacement method for frame
-		# '''
-		# moment_of_inertia = 1000
-		# cross_sectional_area = 100
-		# y_max = 10
-		# modulus_elasticity = 10
-		# connectivity_table = {1 : [1, 2]}
-		# nodal_coordinates = {1 : [0,0], 2 : [0,1]}
-		# boundary_conditions = [0,1,2]
-		# force_vector = [0, 0, 0, 0, -1, 0]
+	def test_fea_frame_calc_displacement(self):
+		'''
+		Test the calc_displacement method for frame
+		'''
+		moment_of_inertia_y = 1000
+		moment_of_inertia_z = 1100
+		cross_sectional_area = 100
+		y_max = 10
+		young_modulus = 10
+		shear_modulus = 11
+		torsional_constant = 12
+		connectivity_table = {1 : [1, 2]}
+		nodal_coordinates = {1 : [0,0,0], 2 : [0,1,0]}
+		boundary_conditions = [0,1,2,3,4,5]
+		force_vector = [0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0]
 		
-		# test_frame = frame(moment_of_inertia, cross_sectional_area, y_max, 
-						   # modulus_elasticity, connectivity_table, nodal_coordinates,
-						   # boundary_conditions, force_vector)
+		test_frame = frame(moment_of_inertia_y, moment_of_inertia_z, cross_sectional_area, 
+						   y_max, young_modulus, shear_modulus, torsional_constant, 
+						   connectivity_table, nodal_coordinates, boundary_conditions, force_vector)
 		
-		# test_frame.create_nodes()
-		# test_frame.create_elements()
-		# test_frame.calc_properties()
-		# test_frame.calc_stiffness()
-		# test_frame.calc_assemblage()
-		# test_frame.calc_displacement()
+		test_frame.create_nodes()
+		test_frame.create_elements()
+		test_frame.calc_properties()
+		test_frame.calc_stiffness()
+		test_frame.calc_assemblage()
+		test_frame.calc_displacement()
 		
-		# equal = (test_frame.Q.round(6) == np.matrix([[0,0,0,0,-0.001,0]]).transpose()).all()
+		equal = (test_frame.Q.round(6) == np.matrix([[0,0,0,0,0,0,0,-0.001,0,0,0,0]]).transpose()).all()
 
-		# self.assertEqual(equal, True)
-		# # self.assertIs(test_frame.Q,1)
-		# self.assertEqual(len(test_frame.Q), 6)
+		self.assertEqual(equal, True)
+		self.assertEqual(len(test_frame.Q), 12)
 		
 	# def test_fea_frame_calc_stress(self):
 		# '''
 		# Test the calc_stress method for frame
 		# '''
-		# moment_of_inertia = 490.87385
+		# moment_of_inertia_y = 490.87385
+		# moment_of_inertia_z = 490.87385
 		# cross_sectional_area = 78.53982
-		# y_max = 5
-		# modulus_elasticity = 10
+		# y_max =5
+		# young_modulus = 10
+		# shear_modulus = 11
+		# torsional_constant = 12
 		# connectivity_table = {1 : [1, 2]}
-		# nodal_coordinates = {1 : [0,0], 2 : [0,1]}
-		# boundary_conditions = [0,1,2]
-		# force_vector = [ 0, 0, 0, 0, -1, 0]
+		# nodal_coordinates = {1 : [0,0,0], 2 : [0,1,0]}
+		# boundary_conditions = [0,1,2,3,4,5]
+		# force_vector = [0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0]
 		
-		# test_frame = frame(moment_of_inertia, cross_sectional_area, y_max, 
-						   # modulus_elasticity, connectivity_table, nodal_coordinates,
-						   # boundary_conditions, force_vector)
+		# test_frame = frame(moment_of_inertia_y, moment_of_inertia_z, cross_sectional_area, 
+						   # y_max, young_modulus, shear_modulus, torsional_constant, 
+						   # connectivity_table, nodal_coordinates, boundary_conditions, force_vector)
 						   
 		# test_frame.create_nodes()
 		# test_frame.create_elements()
@@ -485,74 +505,57 @@ class FeaStructureElementTests(TestCase):
 		# test_frame.calc_stress()
 		
 		# self.assertEqual(round(test_frame.stress[1][0],4), 0.0127)
-		
-	# def test_fea_frame_test_calc_new_nodal_coordinates_real_data(self):
-		# '''
-		# Test the calc_stress method for frame
-		# '''
-		# moment_of_inertia = 30.7
-		# cross_sectional_area = 20
-		# y_max = 2.5
-		# modulus_elasticity = 10000
-		# connectivity_table = {1:[1,2],2:[2,3],3:[3,4],4:[4,5],5:[5,6],6:[6,7],7:[7,8],8:[8,1],9:[8,3],10:[2,7],11:[3,6],12:[7,4]}
-		# nodal_coordinates = {1:[-200,0],2:[-100,100],3:[0,100],4:[100,100],5:[200,0],6:[100,0],7:[0,0],8:[-100,0]}
-		# boundary_conditions = [0,1,13]
-		# force_vector = [0,0,0,0,-50000,0,0,0,0,0,-50000,0,0,0,0,0,0,0,0,50000,0,0,0,0]
-		
-		# test_frame = frame(moment_of_inertia, cross_sectional_area, y_max, 
-						   # modulus_elasticity, connectivity_table, nodal_coordinates,
-						   # boundary_conditions, force_vector)
-						   
-		# test_frame.create_nodes()
-		# test_frame.create_elements()
-		# test_frame.calc_properties()
-		# test_frame.calc_stiffness()
-		# test_frame.calc_assemblage()
-		# test_frame.calc_displacement()
-		# test_frame.calc_new_nodal_coordinates()
-		
-		# self.assertEqual(test_frame.new_nodal_coordinates[7][1] != 0 , True)
 
-# class FEA2DTrussTests(TestCase):
-	# def test_fea_truss_calc_assemblage(self):
-		# '''
-		# Test the calc_assemblage method for truss
-		# '''
-		# moment_of_inertia = 10
-		# cross_sectional_area = 5
-		# y_max = 10
-		# modulus_elasticity = 1
-		# connectivity_table = {1 : [1, 2], 2 : [2, 3]}
-		# nodal_coordinates = {1 : [0,0], 2 : [0,1], 3 : [10,10]}
-		# boundary_conditions = [1,2,3]
-		# force_vector = [0, 0, 0, 0, -1, 0]
+class FEA2DTrussTests(TestCase):
+	def test_fea_truss_calc_assemblage(self):
+		'''
+		Test the calc_assemblage method for truss
+		'''
+		moment_of_inertia_y = 1000
+		moment_of_inertia_z = 1100
+		cross_sectional_area = 100
+		y_max = 10
+		young_modulus = 10
+		shear_modulus = 11
+		torsional_constant = 12
+		connectivity_table = {1 : [1, 2], 2 : [2,3 ]}
+		nodal_coordinates = {1 : [0,0,0], 2 : [0,1,0], 3 : [0,1,1]}
+		boundary_conditions = [0,1,2,3,4,5]
+		force_vector = [0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0]
 		
-		# test_truss = truss(moment_of_inertia, cross_sectional_area, y_max, 
-						   # modulus_elasticity, connectivity_table, nodal_coordinates,
-						   # boundary_conditions, force_vector)
+		test_truss = truss(moment_of_inertia_y, moment_of_inertia_z, cross_sectional_area, 
+						   y_max, young_modulus, shear_modulus, torsional_constant, 
+						   connectivity_table, nodal_coordinates, boundary_conditions, force_vector)
 		
-		# test_truss.create_nodes()
-		# test_truss.create_elements()
+		test_truss.create_nodes()
+		test_truss.create_elements()
 
-		# test_truss.elements[1].K = np.matrix([[1., 1., 1., 1.],
-											  # [1., 1., 1., 1.],
-											  # [1., 1., 1., 1.],
-											  # [1., 1., 1., 1.]])
+		test_truss.elements[1].K = np.matrix([[1., 1., 1., 1., 1., 1.],
+											  [1., 1., 1., 1., 1., 1.],
+											  [1., 1., 1., 1., 1., 1.],
+											  [1., 1., 1., 1., 1., 1.],
+											  [1., 1., 1., 1., 1., 1.],
+											  [1., 1., 1., 1., 1., 1.]])
 
-		# test_truss.elements[2].K = np.matrix([[1., 1., 1., 1.],
-											  # [1., 1., 1., 1.],
-											  # [1., 1., 1., 1.],
-											  # [1., 1., 1., 1.]])
-		# test_truss.calc_assemblage()
+		test_truss.elements[2].K = np.matrix([[1., 1., 1., 1., 1., 1.],
+											  [1., 1., 1., 1., 1., 1.],
+											  [1., 1., 1., 1., 1., 1.],
+											  [1., 1., 1., 1., 1., 1.],
+											  [1., 1., 1., 1., 1., 1.],
+											  [1., 1., 1., 1., 1., 1.]])
+		test_truss.calc_assemblage()
 		
-		# equal = (test_truss.assemblage == np.matrix([[1., 1., 1., 1., 0., 0.],
-													 # [1., 1., 1., 1., 0., 0.],
-													 # [1., 1., 2., 2., 1., 1.],
-													 # [1., 1., 2., 2., 1., 1.],
-													 # [0., 0., 1., 1., 1., 1.],
-													 # [0., 0., 1., 1., 1., 1.]])).all()
+		equal = (test_truss.assemblage == np.matrix([[1., 1., 1., 1., 1.0, 1.0, 0., 0., 0.],
+													 [1., 1., 1., 1., 1.0, 1.0, 0., 0., 0.],
+													 [1., 1., 1., 1., 1.0, 1.0, 0., 0., 0.],
+													 [1., 1., 1., 2., 2.0, 2.0, 1., 1., 1.],
+													 [1., 1., 1., 2., 2.0, 2.0, 1., 1., 1.],
+													 [1., 1., 1., 2., 2.0, 2.0, 1., 1., 1.],
+													 [0., 0., 0., 1., 1.0, 1.0, 1., 1., 1.],
+													 [0., 0., 0., 1., 1.0, 1.0, 1., 1., 1.],
+													 [0., 0., 0., 1., 1.0, 1.0, 1., 1., 1.]])).all()
 
-		# self.assertEqual(equal, True)
+		self.assertEqual(equal, True)
 		
 	# def test_fea_truss_calc_stress(self):
 		# '''
@@ -581,52 +584,54 @@ class FeaStructureElementTests(TestCase):
 		
 		# self.assertEqual(round(test_truss.stress[1][0],4), -0.0127)
 		
-	# def test_fea_truss_calc_new_nodal_coordinates(self):
-		# '''
-		# Test the calc_new_nodal_coordinates method
-		# '''
-		# moment_of_inertia = 10
-		# cross_sectional_area = 5
-		# y_max = 10
-		# modulus_elasticity = 10
-		# connectivity_table = {1 : [1, 2], 2 : [2, 3], 3 : [3, 4], 4 : [4, 5]}
-		# nodal_coordinates = {1 : [0,0], 2 : [0,1], 3 : [1,2], 4 : [4,5], 5 : [10, 10]}
-		# boundary_conditions = [0,1,2]
-		# force_vector = [0, 0, 0, 0, -1, 0]
+	def test_fea_truss_calc_new_nodal_coordinates(self):
+		'''
+		Test the calc_new_nodal_coordinates method
+		'''
+		moment_of_inertia_y = 1000
+		moment_of_inertia_z = 1100
+		cross_sectional_area = 100
+		y_max = 10
+		young_modulus = 10
+		shear_modulus = 11
+		torsional_constant = 12
+		connectivity_table = {1 : [1, 2], 2 : [2, 3], 3 : [3, 4], 4 : [4, 5]}
+		nodal_coordinates = {1 : [0,0,0], 2 : [0,1,1], 3 : [1,2,2], 4 : [4,5,3], 5 : [10,10,4]}
+		boundary_conditions = [0,1,2,3,4,5]
+		force_vector = [0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0]
 		
-		# test_truss = truss(moment_of_inertia, cross_sectional_area, y_max,
-						   # modulus_elasticity, connectivity_table, nodal_coordinates,
-						   # boundary_conditions, force_vector)
+		test_truss = truss(moment_of_inertia_y, moment_of_inertia_z, cross_sectional_area, 
+						   y_max, young_modulus, shear_modulus, torsional_constant, 
+						   connectivity_table, nodal_coordinates, boundary_conditions, force_vector)
 		
-		# test_truss.Q = np.matrix([1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]).transpose()
-		# test_truss.calc_new_nodal_coordinates()
+		test_truss.Q = np.matrix([1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]).transpose()
+		test_truss.calc_new_nodal_coordinates()
 		
-		# self.assertEqual(test_truss.new_nodal_coordinates, {1 : [1,1], 2 : [1,2], 3 : [2,3], 4 : [5,6], 5 : [11, 11]})
-		# # self.assertIs(test_truss.Q, 1)
+		self.assertEqual(test_truss.new_nodal_coordinates, {1 : [1,1,1], 2 : [1,2,2], 3 : [2,3,3], 4 : [5,6,4], 5 : [11, 11,5]})
 
-# class FEA2DFeaTests(TestCase):		
-	# def test_fea_fea_data_validate_force_error(self):
-		# '''
-		# Test the data_validate method; force vector error
-		# '''
+class FEA2DFeaTests(TestCase):		
+	def test_fea_fea_data_validate_force_error(self):
+		'''
+		Test the data_validate method; force vector error
+		'''
+		moment_of_inertia_y = 1000
+		moment_of_inertia_z = 1100
+		cross_sectional_area = 100
+		y_max = 10
+		young_modulus = 10
+		shear_modulus = 11
+		torsional_constant = 12
+		connectivity_table = {1 : [1, 2], 2 : [2, 3], 3 : [3, 4], 4 : [4, 5]}
+		nodal_coordinates = {1 : [0,0,0], 2 : [0,1,1], 3 : [1,2,2], 4 : [4,5,3], 5 : [10,10,4]}
+		boundary_conditions = [0,1,2,3,4,5]
+		force_vector = [0, 0, 0, 0, 0, 0, 0, -1, 0]
+		frame_or_truss = 'frame'
 		
-		# moment_of_inertia = 30
-		# cross_sectional_area = 20
-		# y_max = 15
-		# modulus_elasticity = 10
-		# connectivity_table = {1 : [1, 2]}
-		# nodal_coordinates = {1 : [0,0], 2 : [0,1]}
-		# boundary_conditions = [0,1]
-		# force_vector = [0, 0, 0, -1, 0]
-		# frame_or_truss = 'frame'
-		
-		# test_fea = fea(moment_of_inertia, cross_sectional_area, y_max, 
-					   # modulus_elasticity, connectivity_table, nodal_coordinates,
-					   # boundary_conditions, force_vector, frame_or_truss)
-					   
-		
+		test_fea = fea(moment_of_inertia_y, moment_of_inertia_z, cross_sectional_area, 
+					   y_max, young_modulus, shear_modulus, torsional_constant, 
+					   connectivity_table, nodal_coordinates, boundary_conditions, force_vector, frame_or_truss)
 
-		# self.assertEqual(test_fea.analyze(), "ERROR: size of force vector too small, require 3*(# of nodes)")
+		self.assertEqual(test_fea.analyze(), "ERROR: size of force vector too small, require 6*(# of nodes)")
 	
 	# def test_fea_fea_analyze_frame(self):
 		# '''
