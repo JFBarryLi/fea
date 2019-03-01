@@ -500,9 +500,9 @@ class truss(structure):
 			qjy = self.Q[ele.nodej.id * 2 - 1]
 			
 			# Displacements in Local Coordinates
-			qi_local = qix * ele.Cx + qiy * ele.Cy
-			qj_local = qjx * ele.Cx + qjy * ele.Cy
-			self.stress[i] = self.modulus_elasticity * (qj_local - qi_local) / ele.L
+			qi_local = qix * ele.Cxx + qiy * ele.Cyx
+			qj_local = qjx * ele.Cxx + qjy * ele.Cyx
+			self.stress[i] = self.young_modulus * (qj_local - qi_local) / ele.L
 	
 class fea():
 	'''
@@ -597,7 +597,7 @@ class fea():
 		# Bug with truss, whenever it's a truss analysis, the output is in ndarray
 		if type(self.struc.new_nodal_coordinates[1][0]) == np.ndarray:
 			for i in range(1, len(self.struc.new_nodal_coordinates) + 1):
-				for j in range(0, 2):
+				for j in range(0, 3):
 					self.struc.new_nodal_coordinates[i][j] = self.struc.new_nodal_coordinates[i][j].tolist()[0]
 		
 		self.new_nodal_coordinates = self.struc.new_nodal_coordinates

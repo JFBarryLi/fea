@@ -151,6 +151,33 @@ class FeaStructureInputViewTests(TestCase):
 		
 		self.assertEqual(response.status_code, 201)
 		
+	def test_Json_input_object(self):
+		'''
+		Check for a valid status given real data
+		'''
+		
+		factory = APIRequestFactory()
+		
+		data = {
+			"moment_of_inertia_y":"30.664",
+			"moment_of_inertia_z":"30.664",
+			"cross_sectional_area":"19.625",
+			"y_max":"2.5",
+			"young_modulus":"10000",
+			"shear_modulus":"10000",
+			"torsional_constant":"30.664",
+			"connectivity_table":"{1:[1,2],2:[2,3],3:[3,4],4:[4,5],5:[5,6],6:[6,7],7:[7,8],8:[8,1],9:[8,3],10:[2,7],11:[3,6],12:[7,4],13:[1,9],14:[2,10],15:[3,11],16:[4,12],17:[5,13],18:[6,14],19:[7,15],20:[8,16],21:[9,10],22:[10,11],23:[11,12],24:[12,13],25:[13,14],26:[14,15],27:[15,16],28:[16,9],29:[16,11],30:[10,15],31:[11,14],32:[15,12]}",
+			"nodal_coordinates":"{1:[-200,0,0],2:[-100,100,0],3:[0,100,0],4:[100,100,0],5:[200,0,0],6:[100,0,0],7:[0,0,0],8:[-100,0,0],9:[-200,0,-100],10:[-100,100,-100],11:[0,100,-100],12:[100,100,-100],13:[200,0,-100],14:[100,0,-100],15:[0,0,-100],16:[-100,0,-100]}",
+			"boundary_conditions":"[0,1,2,12,13,24,25,36,37]",
+			"force_vector":"[0,0,0,0,-50000,0,0,-50000,0,0,0,0,0,0,0,0,0,0,0,50000,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]",
+			"frame_or_truss":"truss"
+		}
+		request = factory.post('input/',data, format='json')
+		view = fea_structure_input
+		response = view(request)
+		
+		self.assertEqual(response.status_code, 201)
+		
 class FEA2DOutputViewTests(TestCase):				
 	def test_json_output_object(self):
 		'''
