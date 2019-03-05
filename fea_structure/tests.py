@@ -606,32 +606,35 @@ class FEA2DTrussTests(TestCase):
 
 		self.assertEqual(equal, True)
 		
-	# def test_fea_truss_calc_stress(self):
-		# '''
-		# Test the calc_stress method for truss
-		# '''
-		# moment_of_inertia = 490.87385
-		# cross_sectional_area = 78.53982
-		# y_max = 5
-		# modulus_elasticity = 10
-		# connectivity_table = {1 : [1, 2]}
-		# nodal_coordinates = {1 : [0,0], 2 : [0,1]}
-		# boundary_conditions = [0,1]
-		# force_vector = [ 0, 0, 0, -1]
+	def test_fea_truss_calc_stress(self):
+		'''
+		Test the calc_stress method for truss
+		'''
+		moment_of_inertia_y = 1000
+		moment_of_inertia_z = 1000
+		cross_sectional_area = 100
+		y_max = 4
+		young_modulus = 100
+		shear_modulus = 100
+		torsional_constant = 1000
+		connectivity_table = {1 : [1, 2]}
+		nodal_coordinates = {1 : [0,0,0], 2 : [0,1000,0]}
+		boundary_conditions = [0,1,2]
+		force_vector = [0,0,0,0,-10000,0]
 		
-		# test_truss = truss(moment_of_inertia, cross_sectional_area, y_max, 
-						   # modulus_elasticity, connectivity_table, nodal_coordinates,
-						   # boundary_conditions, force_vector)
+		test_truss = truss(moment_of_inertia_y, moment_of_inertia_z, cross_sectional_area, 
+						   y_max, young_modulus, shear_modulus, torsional_constant, 
+						   connectivity_table, nodal_coordinates, boundary_conditions, force_vector)
 						   
-		# test_truss.create_nodes()
-		# test_truss.create_elements()
-		# test_truss.calc_properties()
-		# test_truss.calc_stiffness()
-		# test_truss.calc_assemblage()
-		# test_truss.calc_displacement()
-		# test_truss.calc_stress()
+		test_truss.create_nodes()
+		test_truss.create_elements()
+		test_truss.calc_properties()
+		test_truss.calc_stiffness()
+		test_truss.calc_assemblage()
+		test_truss.calc_displacement()
+		test_truss.calc_stress()
 		
-		# self.assertEqual(round(test_truss.stress[1][0],4), -0.0127)
+		self.assertEqual(test_truss.stress[1][0], -100)
 		
 	def test_fea_truss_calc_new_nodal_coordinates(self):
 		'''
@@ -705,26 +708,28 @@ class FEA2DFeaTests(TestCase):
 
 		# self.assertEqual(round(test_fea.struc.stress[1][0],4), 0.0127)
 		
-	# def test_fea_fea_analyze_truss(self):
-		# '''
-		# Test the analyze method for the fea class
-		# '''
+	def test_fea_fea_analyze_truss(self):
+		'''
+		Test the analyze method for the fea class
+		'''
 		
-		# moment_of_inertia = 490.87385
-		# cross_sectional_area = 78.53982
-		# y_max = 5
-		# modulus_elasticity = 10
-		# connectivity_table = {1 : [1, 2]}
-		# nodal_coordinates = {1 : [0,0], 2 : [0,1]}
-		# boundary_conditions = [0,1]
-		# force_vector = [ 0, 0, 0, -1]
-		# frame_or_truss = 'truss'
+		moment_of_inertia_y = 1000
+		moment_of_inertia_z = 1000
+		cross_sectional_area = 100
+		y_max = 4
+		young_modulus = 100
+		shear_modulus = 100
+		torsional_constant = 1000
+		connectivity_table = {1 : [1, 2]}
+		nodal_coordinates = {1 : [0,0,0], 2 : [0,1000,0]}
+		boundary_conditions = [0,1,2]
+		force_vector = [0,0,0,0,-10000,0]
+		frame_or_truss = 'truss'
 		
-		# test_fea = fea(moment_of_inertia, cross_sectional_area, y_max,
-					   # modulus_elasticity, connectivity_table, nodal_coordinates,
-					   # boundary_conditions, force_vector, frame_or_truss)
-					   
-		# test_fea.analyze()
+		test_fea = fea(moment_of_inertia_y, moment_of_inertia_z, cross_sectional_area, 
+					   y_max, young_modulus, shear_modulus, torsional_constant, 
+					   connectivity_table, nodal_coordinates, boundary_conditions, force_vector, frame_or_truss)
+						   
+		test_fea.analyze()
 		
-		# self.assertEqual(round(test_fea.struc.stress[1],4), -0.0127)
-		# # self.assertIs(test_fea.struc.new_nodal_coordinates, 1)
+		self.assertEqual(test_fea.stress[1], -100)

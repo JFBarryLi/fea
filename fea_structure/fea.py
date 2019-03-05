@@ -494,14 +494,16 @@ class truss(structure):
 			
 			ele = self.elements[i]
 			# Displacements in Global Coordinates
-			qix = self.Q[ele.nodei.id * 2 - 2]
-			qiy = self.Q[ele.nodei.id * 2 - 1]
-			qjx = self.Q[ele.nodej.id * 2 - 2]
-			qjy = self.Q[ele.nodej.id * 2 - 1]
+			qix = self.Q[ele.nodei.id * 3 - 3]
+			qiy = self.Q[ele.nodei.id * 3 - 2]
+			qiz = self.Q[ele.nodei.id * 3 - 1]
+			qjx = self.Q[ele.nodej.id * 3 - 3]
+			qjy = self.Q[ele.nodej.id * 3 - 2]
+			qjz = self.Q[ele.nodej.id * 3 - 1]
 			
 			# Displacements in Local Coordinates
-			qi_local = qix * ele.Cxx + qiy * ele.Cyx
-			qj_local = qjx * ele.Cxx + qjy * ele.Cyx
+			qi_local = qix * ele.Cxx + qiy * ele.Cyx + qiz * ele.Czx
+			qj_local = qjx * ele.Cxx + qjy * ele.Cyx + qjz * ele.Czx
 			self.stress[i] = self.young_modulus * (qj_local - qi_local) / ele.L
 	
 class fea():
