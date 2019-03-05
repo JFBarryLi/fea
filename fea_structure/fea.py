@@ -160,7 +160,7 @@ class element():
 		
 	def calc_stiffness_truss(self):
 		E = self.E
-		A = self.A*self.A
+		A = self.A
 		L = self.L
 		Cx = self.Cxx
 		Cy = self.Cyx
