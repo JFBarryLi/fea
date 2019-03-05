@@ -240,23 +240,30 @@ class FeaStructureElementTests(TestCase):
 		self.assertEqual(test_element.Cyx, 1)
 		self.assertEqual(test_element.Czx, 0)
 		
-	# def test_fea_element_calc_stiffness_frame_general(self):
-		# '''
-		# Test the calculation of the stiffness matrix general case for a frame
-		# '''
-		# nodei = node(1, 0, 0, 0)
-		# nodej = node(2, 0, 10, 0)
-		# test_element = element(nodei, nodej, 10, 10, 1)
-		# test_element.calc_stiffness_frame()
+	def test_fea_element_calc_stiffness_frame_general(self):
+		'''
+		Test the calculation of the stiffness matrix general case for a frame
+		'''
+		nodei = node(1, 0, 0, 0)
+		nodej = node(2, 0, 10, 0)
+		test_element = element(nodei, nodej, 1, 2, 3, 4, 5, 6)
+		test_element.calc_properties()
+		test_element.calc_stiffness_frame()
 		
-		# equal = (test_element.K == np.matrix([[1.2, 0., 6., -1.2, 0., 6.],
-											  # [0., 1., 0., 0., -1., 0.],
-											  # [6., 0., 40., -6., 0., 20.],
-											  # [-1.2, 0., -6., 1.2, 0., -6.],
-											  # [0., -1., 0., 0., 1., 0.],
-											  # [6.0, 0., 20., -6., 0., 40.]])).all()
-
-		# self.assertEqual(equal, True)
+		equal = (test_element.K == np.matrix([[0.06, 0., 0., 0., 0., -0.3, -0.06, 0., 0., 0., 0., -0.3],
+											  [0., 0.6, 0., 0., 0., 0., 0., -0.6, 0., 0., 0., 0.],
+											  [0., 0., 0.048, 0.24, 0., 0., 0., 0., -0.048, 0.24, 0., 0.],
+											  [0., 0., 0.24, 1.6, 0., 0., 0., 0., -0.24, 0.8, 0., 0.],
+											  [0., 0., 0., 0., 0.6, 0., 0., 0., 0., 0., -0.6, 0.],
+											  [-0.3, 0., 0., 0., 0., 2., 0.3, 0., 0., 0., 0., 1.],
+											  [-0.06, 0., 0., 0., 0., 0.3, 0.06, 0., 0., 0., 0., 0.3],
+											  [0., -0.6, 0., 0., 0., 0., 0., 0.6, 0., 0., 0., 0.],
+											  [0., 0., -0.048, -0.24, 0., 0., 0., 0., 0.048, -0.24, 0., 0.],
+											  [0., 0., 0.24, 0.8, 0., 0., 0., 0., -0.24, 1.6, 0., 0.],
+											  [0., 0., 0., 0., -0.6, 0., 0., 0., 0., 0., 0.6, 0.],
+											  [-0.3, 0., 0., 0., 0., 1., 0.3, 0., 0., 0., 0., 2.]])).all()
+										  
+		self.assertEqual(equal, True)
 		
 	# def test_fea_element_calc_sitffness_frame_xy_coincide_bigger_jz(self):
 	
@@ -399,77 +406,92 @@ class FeaStructureFrameTests(TestCase):
 		self.assertEqual(test_frame.elements[1].Cyx, 0)
 		self.assertEqual(test_frame.elements[1].Czx, 1)
 
-	# def test_fea_frame_element_calc_stiffness(self):
-		# '''
-		# Test the calc_stiffness method of each element
-		# '''
-		# moment_of_inertia = 1
-		# cross_sectional_area = 1
-		# y_max = 10
-		# modulus_elasticity = 1
-		# connectivity_table = {1 : [1, 2], 2 : [2, 3]}
-		# nodal_coordinates = {1 : [0,0], 2 : [0,1], 3 : [10,10]}
-		# boundary_conditions = [1,2,3]
-		# force_vector = [0, 0, 0, 0, -1, 0]
+	def test_fea_frame_element_calc_stiffness(self):
+		'''
+		Test the calc_stiffness method of each element
+		'''
+		moment_of_inertia_y = 4
+		moment_of_inertia_z = 5
+		cross_sectional_area = 6
+		y_max = 5
+		young_modulus = 1
+		shear_modulus = 2
+		torsional_constant = 3
+		connectivity_table = {1 : [1, 2]}
+		nodal_coordinates = {1 : [0,0,0], 2 : [0,10,0]}
+		boundary_conditions = [1,2,3]
+		force_vector = [0,0,0,0,0,0,0,0,0,0,0,0]
 		
-		# test_frame = frame(moment_of_inertia, cross_sectional_area, y_max, 
-						   # modulus_elasticity, connectivity_table, nodal_coordinates,
-						   # boundary_conditions, force_vector)
-		
-		# test_frame.create_nodes()
-		# test_frame.create_elements()
-		# test_frame.calc_properties()
-		# test_frame.calc_stiffness()
-		
-		# equal = (test_frame.elements[1].K == np.matrix([[12., 0., 6., -12., 0., 6.],
-													    # [0., 1., 0., 0., -1., 0.],
-													    # [6., 0., 4., -6., 0., 2.],
-													    # [-12., 0., -6., 12., 0., -6.],
-													    # [0., -1., 0., 0., 1., 0.],
-													    # [6., 0., 2., -6., 0., 4.]])).all()
+		test_frame = frame(moment_of_inertia_y, moment_of_inertia_z, cross_sectional_area, 
+						   y_max, young_modulus, shear_modulus, torsional_constant, 
+						   connectivity_table, nodal_coordinates, boundary_conditions, force_vector)
+						   
 
-		# self.assertEqual(equal, True)
+		test_frame.create_nodes()
+		test_frame.create_elements()
+		test_frame.calc_properties()
+		test_frame.calc_stiffness()
 		
-	# def test_fea_frame_calc_assemblage(self):
-		# '''
-		# Test the calc_assemblage method for frame
-		# '''
-		# moment_of_inertia = 1
-		# cross_sectional_area = 1
-		# y_max = 10
-		# modulus_elasticity = 1
-		# connectivity_table = {1 : [1, 2], 2 : [2, 3]}
-		# nodal_coordinates = {1 : [0,0], 2 : [0,1], 3 : [10,10]}
-		# boundary_conditions = [1,2,3]
-		# force_vector = [0, 0, 0, 0, -1, 0]
+		equal = (test_frame.elements[1].K == np.matrix([[0.06, 0., 0., 0., 0., -0.3, -0.06, 0., 0., 0., 0., -0.3],
+													    [0., 0.6, 0., 0., 0., 0., 0., -0.6, 0., 0., 0., 0.],
+													    [0., 0., 0.048, 0.24, 0., 0., 0., 0., -0.048, 0.24, 0., 0.],
+													    [0., 0., 0.24, 1.6, 0., 0., 0., 0., -0.24, 0.8, 0., 0.],
+													    [0., 0., 0., 0., 0.6, 0., 0., 0., 0., 0., -0.6, 0.],
+													    [-0.3, 0., 0., 0., 0., 2., 0.3, 0., 0., 0., 0., 1.],
+													    [-0.06, 0., 0., 0., 0., 0.3, 0.06, 0., 0., 0., 0., 0.3],
+													    [0., -0.6, 0., 0., 0., 0., 0., 0.6, 0., 0., 0., 0.],
+													    [0., 0., -0.048, -0.24, 0., 0., 0., 0., 0.048, -0.24, 0., 0.],
+													    [0., 0., 0.24, 0.8, 0., 0., 0., 0., -0.24, 1.6, 0., 0.],
+													    [0., 0., 0., 0., -0.6, 0., 0., 0., 0., 0., 0.6, 0.],
+													    [-0.3, 0., 0., 0., 0., 1., 0.3, 0., 0., 0., 0., 2.]])).all()
+		self.assertEqual(equal, True)
 		
-		# test_frame = frame(moment_of_inertia, cross_sectional_area, y_max, 
-						   # modulus_elasticity, connectivity_table, nodal_coordinates,
-						   # boundary_conditions, force_vector)
+	def test_fea_frame_calc_assemblage(self):
+		'''
+		Test the calc_assemblage method for frame
+		'''
+		moment_of_inertia_y = 4
+		moment_of_inertia_z = 5
+		cross_sectional_area = 6
+		y_max = 5
+		young_modulus = 1
+		shear_modulus = 2
+		torsional_constant = 3
+		connectivity_table = {1 : [1, 2], 2: [2,3]}
+		nodal_coordinates = {1 : [0,0,0], 2 : [0,10,0], 3 : [10, 10, 0]}
+		boundary_conditions = [1,2,3]
+		force_vector = [0,0,0,0,0,0,0,0,0,0,0,0]
 		
-		# test_frame.create_nodes()
-		# test_frame.create_elements()
-		# test_frame.calc_properties()
-		# test_frame.calc_stiffness()
-		# test_frame.elements[2].K = np.matrix([[12., 0., 6., -12., 0., 6.],
-											  # [0., 1., 0., 0., -1., 0.],
-											  # [6., 0., 4., -6., 0., 2.],
-											  # [-12., 0., -6., 12., 0., -6.],
-											  # [0., -1., 0., 0., 1., 0.],
-											  # [6., 0., 2., -6., 0., 4.]])
-		# test_frame.calc_assemblage()
+		test_frame = frame(moment_of_inertia_y, moment_of_inertia_z, cross_sectional_area, 
+						   y_max, young_modulus, shear_modulus, torsional_constant, 
+						   connectivity_table, nodal_coordinates, boundary_conditions, force_vector)
 		
-		# equal = (test_frame.assemblage == np.matrix([[12., 0., 6., -12., 0., 6., 0., 0., 0.],
-													 # [0., 1., 0., 0., -1., 0., 0., 0., 0.],
-													 # [6., 0., 4., -6., 0., 2., 0., 0., 0.],
-													 # [-12., 0., -6., 24., 0., 0., -12., 0., 6.],
-													 # [0., -1., 0., 0., 2., 0., 0., -1., 0.],
-													 # [6., 0., 2., 0., 0., 8., -6., 0., 2.],
-													 # [0., 0., 0., -12., 0., -6., 12., 0., -6.],
-													 # [0., 0., 0., 0., -1., 0., 0., 1., 0.],
-													 # [0., 0., 0., 6., 0., 2., -6., 0., 4.]])).all()
-
-		# self.assertEqual(equal, True)
+		test_frame.create_nodes()
+		test_frame.create_elements()
+		test_frame.calc_properties()
+		test_frame.calc_stiffness()
+		test_frame.calc_assemblage()
+		
+		equal = (np.round(test_frame.assemblage, 3) == np.matrix([[0.06,0.,0.,0.,0.,-0.3,-0.06,0.,0.,0.,0.,-0.3,0.,0.,0.,0.,0.,0.],
+																  [0.,0.6,0.,0.,0.,0.,0.,-0.6,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.],
+																  [0.,0.,0.048,0.24,0.,0.,0.,0.,-0.048,0.24,0.,0.,0.,0.,0.,0.,0.,0.],
+																  [0.,0.,0.24,1.6,0.,0.,0.,0.,-0.24,0.8,0.,0.,0.,0.,0.,0.,0.,0.],
+																  [0.,0.,0.,0.,0.6,0.,0.,0.,0.,0.,-0.6,0.,0.,0.,0.,0.,0.,0.],
+																  [-0.3,0.,0.,0.,0.,2.,0.3,0.,0.,0.,0.,1.,0.,0.,0.,0.,0.,0.],
+																  [-0.06,0.,0.,0.,0.,0.3,0.66,0.,0.,0.,0.,0.3,-0.6,0.,0.,0.,0.,0.],
+																  [0.,-0.6,0.,0.,0.,0.,0.,0.66,0.,0.,0.,0.3,0.,-0.06,0.,0.,0.,0.3],
+																  [0.,0.,-0.048,-0.24,0.,0.,0.,0.,0.096,-0.24,-0.24,0.,0.,0.,-0.048,0.,-0.24,0.],
+																  [0.,0.,0.24,0.8,0.,0.,0.,0.,-0.24,2.2,0.,0.,0.,0.,0.,-0.6,0.,0.],
+																  [0.,0.,0.,0.,-0.6,0.,0.,0.,-0.24,0.,2.2,0.,0.,0.,0.24,0.,0.8,0.],
+																  [-0.3,0.,0.,0.,0.,1.,0.3,0.3,0.,0.,0.,4.,0.,-0.3,0.,0.,0.,1.],
+																  [0.,0.,0.,0.,0.,0.,-0.6,0.,0.,0.,0.,0.,0.6,0.,0.,0.,0.,0.],
+																  [0.,0.,0.,0.,0.,0.,0.,-0.06,0.,0.,0.,-0.3,0.,0.06,0.,0.,0.,-0.3],
+																  [0.,0.,0.,0.,0.,0.,0.,0.,-0.048,0.,0.24,0.,0.,0.,0.048,0.,0.24,0.],
+																  [0.,0.,0.,0.,0.,0.,0.,0.,0.,-0.6,0.,0.,0.,0.,0.,0.6,0.,0.],
+																  [0.,0.,0.,0.,0.,0.,0.,0.,-0.24,0.,0.8,0.,0.,0.,0.24,0.,1.6,0.],
+																  [0.,0.,0.,0.,0.,0.,0.,0.3,0.,0.,0.,1.,0.,-0.3,0.,0.,0.,2.]])).all()
+													 
+		self.assertEqual(equal, True)
 		
 	def test_fea_frame_calc_displacement(self):
 		'''
