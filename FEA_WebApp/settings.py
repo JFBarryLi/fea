@@ -152,8 +152,11 @@ CORS_ORIGIN_WHITELIST = (
 		'jfbarryli.github.io/fea',
     'localhost:8000',
     '127.0.0.1:8000',
-	'127.0.0.1:7000',
+		'127.0.0.1:7000',
 		'127.0.0.1',
 		'localhost',
 		'localhost:80',
+		'localhost:7000',
+		'jfbarryli.github.io/FEA_WebApp_Front_End/index.html',
+		'jfbarryli.github.io/FEA_WebApp_Front_End'
 )

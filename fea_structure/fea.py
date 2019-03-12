@@ -338,7 +338,7 @@ class structure(ABC):
 		assemblage_bc_removed = np.delete(assemblage_bc_removed, bc, axis=1)
 		
 		# Displacement = Assemblage Matrix divided by Force vector
-		self.Q = np.linalg.inv(assemblage_bc_removed) * force_bc_removed
+		self.Q = np.linalg.solve(assemblage_bc_removed, force_bc_removed)
 		
 		# Insert zero rows into the displacement vector at the locaiton of the boundary conditions
 		total_dof_index = np.linspace(0, size - 1, num = size, dtype = int)
@@ -411,10 +411,12 @@ class frame(structure):
 			
 			ele = self.elements[i]
 			# Displacements in Global Coordinates
-			qix = self.Q[ele.nodei.id * 3 - 3]
-			qiy = self.Q[ele.nodei.id * 3 - 2]
-			qjx = self.Q[ele.nodej.id * 3 - 3]
-			qjy = self.Q[ele.nodej.id * 3 - 2]
+			qix = self.Q[ele.nodei.id * 6 - 6]
+			qiy = self.Q[ele.nodei.id * 6 - 5]
+			qiz = self.Q[ele.nodei.id * 6 - 4]
+			qjx = self.Q[ele.nodej.id * 6 - 6]
+			qjy = self.Q[ele.nodej.id * 6 - 5]
+			qiz = self.Q[ele.nodej.id * 6 - 4]
 			
 			
 			# Displacements in Local Coordinates
@@ -423,8 +425,8 @@ class frame(structure):
 			
 			qiy_local = qix * -ele.Cyx + qiy * ele.Cxx
 			qjy_local = qjx * -ele.Cyx + qjy * ele.Cxx
-			qi_theta = self.Q[ele.nodei.id * 3 - 1]
-			qj_theta = self.Q[ele.nodej.id * 3 - 1]
+			qi_theta = self.Q[ele.nodei.id * 6 - 3]
+			qj_theta = self.Q[ele.nodej.id * 6 - 3]
 			
 			# Axial stress
 			axial_stress = self.young_modulus * (qjx_local - qix_local) / ele.L

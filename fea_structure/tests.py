@@ -525,35 +525,35 @@ class FeaStructureFrameTests(TestCase):
 		self.assertEqual(equal, True)
 		self.assertEqual(len(test_frame.Q), 12)
 		
-	# def test_fea_frame_calc_stress(self):
-		# '''
-		# Test the calc_stress method for frame
-		# '''
-		# moment_of_inertia_y = 490.87385
-		# moment_of_inertia_z = 490.87385
-		# cross_sectional_area = 78.53982
-		# y_max =5
-		# young_modulus = 10
-		# shear_modulus = 11
-		# torsional_constant = 12
-		# connectivity_table = {1 : [1, 2]}
-		# nodal_coordinates = {1 : [0,0,0], 2 : [0,1,0]}
-		# boundary_conditions = [0,1,2,3,4,5]
-		# force_vector = [0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0]
+	def test_fea_frame_calc_stress(self):
+		'''
+		Test the calc_stress method for frame
+		'''
+		moment_of_inertia_y = 1000
+		moment_of_inertia_z = 1000
+		cross_sectional_area = 100
+		y_max = 4
+		young_modulus = 100
+		shear_modulus = 100
+		torsional_constant = 1000
+		connectivity_table = {1 : [1, 2]}
+		nodal_coordinates = {1 : [0,0,0], 2 : [0,1000,0]}
+		boundary_conditions = [0,1,2,3,4,5]
+		force_vector = [0,0,0,0,0,0,0,-10000,0,0,0,0]
 		
-		# test_frame = frame(moment_of_inertia_y, moment_of_inertia_z, cross_sectional_area, 
-						   # y_max, young_modulus, shear_modulus, torsional_constant, 
-						   # connectivity_table, nodal_coordinates, boundary_conditions, force_vector)
+		test_frame = frame(moment_of_inertia_y, moment_of_inertia_z, cross_sectional_area, 
+						   y_max, young_modulus, shear_modulus, torsional_constant, 
+						   connectivity_table, nodal_coordinates, boundary_conditions, force_vector)
 						   
-		# test_frame.create_nodes()
-		# test_frame.create_elements()
-		# test_frame.calc_properties()
-		# test_frame.calc_stiffness()
-		# test_frame.calc_assemblage()
-		# test_frame.calc_displacement()
-		# test_frame.calc_stress()
+		test_frame.create_nodes()
+		test_frame.create_elements()
+		test_frame.calc_properties()
+		test_frame.calc_stiffness()
+		test_frame.calc_assemblage()
+		test_frame.calc_displacement()
+		test_frame.calc_stress()
 		
-		# self.assertEqual(round(test_frame.stress[1][0],4), 0.0127)
+		self.assertEqual(test_frame.stress[1][0], 100)
 
 class FEA2DTrussTests(TestCase):
 	def test_fea_truss_calc_assemblage(self):
