@@ -25,7 +25,7 @@ SECRET_KEY = '08z74=x&o1kt0l2pg&j%72&&q=e0qd419&l1!%gck+^q(mp9j+'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['ec2-18-216-231-0.us-east-2.compute.amazonaws.com', 'localhost', '127.0.0.1']
 
 
 # Application definition
@@ -134,8 +134,8 @@ REST_FRAMEWORK = {
         'rest_framework.throttling.UserRateThrottle'
     ),
     'DEFAULT_THROTTLE_RATES': {
-        'anon': '100/min',
-        'user': '1000/day'
+        'anon': '10/min',
+        'user': '200/day'
     }
 	
 	
@@ -149,14 +149,17 @@ CACHES = {
 
 CORS_ORIGIN_WHITELIST = (
     'jfbarryli.github.io',
-		'jfbarryli.github.io/fea',
+	'jfbarryli.github.io/fea',
     'localhost:8000',
     '127.0.0.1:8000',
-		'127.0.0.1:7000',
-		'127.0.0.1',
-		'localhost',
-		'localhost:80',
-		'localhost:7000',
-		'jfbarryli.github.io/FEA_WebApp_Front_End/index.html',
-		'jfbarryli.github.io/FEA_WebApp_Front_End'
+	'127.0.0.1:7000',
+	'127.0.0.1',
+	'localhost',
+	'localhost:80',
+	'localhost:7000',
+	'jfbarryli.github.io/FEA_WebApp_Front_End/index.html',
+	'jfbarryli.github.io/FEA_WebApp_Front_End',
+	'barryli.dev',
+	'barryli.dev/structure',
+	'barryli.dev/structure.html'
 )
