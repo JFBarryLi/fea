@@ -161,5 +161,9 @@ CORS_ORIGIN_WHITELIST = (
 	'jfbarryli.github.io/FEA_WebApp_Front_End',
 	'barryli.dev',
 	'barryli.dev/structure',
-	'barryli.dev/structure.html'
+	'barryli.dev/structure.html',
+	'https://www.barryli.dev',
+	'www.barryli.dev',
+	'https://www.barryli.dev/structure',
+	'https://www.barryli.dev/structure.html',
 )
