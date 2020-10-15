@@ -7,5 +7,6 @@ setup(
     install_requires=[
         'flask==1.1.2',
         'pytest==6.1.1',
+        'numpy==1.19.2',
     ],
 )
