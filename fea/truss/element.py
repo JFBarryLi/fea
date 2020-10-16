@@ -16,7 +16,7 @@ class Element():
         Id for the element.
     nodei : Node
         Node object, representing node i.
-    nodej: Node
+    nodej : Node
         Node object, representing node j.
     E : float
         Young's modulus [MPa].
@@ -31,7 +31,7 @@ class Element():
     Cz : float
         Direction cosine in z.
     K : matrix
-        Stiffness matrix in global coordinates.
+        Stiffness matrix for the element in global coordinates.
 
     Methods
     -------
