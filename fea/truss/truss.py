@@ -20,14 +20,16 @@ class Truss():
         Young's modulus, and cross-sectional area.
     nodal_coords : dict
         Dictionary representing the coordinates of each node.
-        {node_id1 : [x1, y1],...}
+        {node_id: {x: ..., y: ..., z: ...}, ...}
     connectivity : dict
         Dictionary representing the 2 nodes associated with each element.
-        {id : [nodei_id, nodej_id],...}
+        {ele_id : {i: nodei_id, j: nodej_id}, ...}
     force_vector : dict
         Dictionary representing the external force input onto the truss.
+        {node_id: {x: ..., y:..., z: ...}, ...}
     boundary_conditions : dict
         Dictionary representing the boundary condition constraints.
+        {node_id: {x: ..., y:..., z: ...}, ...}
     K : ndarray
         Stiffness matrix for the truss.
     nodes : dict
@@ -57,6 +59,7 @@ class Truss():
         force_vector,
         boundary_conditions
     ):
+        log.info('Initializing truss solver.')
         self.E = mat_prop['E']
         self.A = mat_prop['A']
         self.nodal_coords = nodal_coords
@@ -69,11 +72,26 @@ class Truss():
         self.disp_vector = {}
         self.stress = {}
 
-    def create_nodes():
-        pass
+    def create_nodes(self):
+        log.info('Instantiating truss nodes.')
+        for node in self.nodal_coords:
+            self.node[node] = Node(
+                node,
+                self.nodal_coords[node]['x'],
+                self.nodal_coords[node]['y'],
+                self.nodal_coords[node]['z']
+            )
 
-    def create_elements():
-        pass
+    def create_elements(self):
+        log.info('Instantiating truss elements.')
+        for ele in self.connectivity:
+            self.elements[ele] = Element(
+                ele,
+                self.connectivity[ele]['i'],
+                self.connectivity[ele]['j'],
+                self.E,
+                self.A
+            )
 
     def assemblage():
         pass
