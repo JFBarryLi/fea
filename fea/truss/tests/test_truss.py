@@ -1,20 +1,41 @@
-# from fea.truss.truss import Truss
+from fea.truss.truss import Truss
+
+# TODO: Find a textbook example to use as test cases.
+mat_prop = {'E': 1, 'A': 1}
+nodal_coords = {1: {'x': 0, 'y': 0, 'z': 0}, 2: {'x': 3, 'y': 4, 'z': 0}}
+connectivity = {1: {'i': 1, 'j': 2}}
+force_vector = {}
+boundary_conditions = {}
+
+t = Truss(
+    mat_prop,
+    nodal_coords,
+    connectivity,
+    force_vector,
+    boundary_conditions
+)
 
 
 def test_truss_creation():
-    pass
+    assert t.nodal_coords == {
+        1: {'x': 0, 'y': 0, 'z': 0},
+        2: {'x': 3, 'y': 4, 'z': 0}
+    }
 
 
 def test_truss_create_nodes():
-    pass
+    t.create_nodes()
+    assert t.nodes[1].x == 0
 
 
 def test_truss_create_elements():
-    pass
+    t.create_elements()
+    assert t.elements[1]
 
 
 def test_truss_assemblage():
-    pass
+    t.assemblage()
+    assert t.any()
 
 
 def test_truss_displacement():

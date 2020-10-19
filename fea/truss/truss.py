@@ -75,7 +75,7 @@ class Truss():
     def create_nodes(self):
         log.info('Instantiating truss nodes.')
         for node in self.nodal_coords:
-            self.node[node] = Node(
+            self.nodes[node] = Node(
                 node,
                 self.nodal_coords[node]['x'],
                 self.nodal_coords[node]['y'],
@@ -87,14 +87,77 @@ class Truss():
         for ele in self.connectivity:
             self.elements[ele] = Element(
                 ele,
-                self.connectivity[ele]['i'],
-                self.connectivity[ele]['j'],
+                self.nodes[self.connectivity[ele]['i']],
+                self.nodes[self.connectivity[ele]['j']],
                 self.E,
                 self.A
             )
+            self.elements[ele].stiffness()
 
-    def assemblage():
-        pass
+    def assemblage(self):
+        log.info('Calculating assemblage stiffness matrix.')
+        # A truss structure have 3 degrees of freedom.
+        DOF = 3
+        size = len(self.nodes) * DOF
+
+        # Initialize assemblage matrix to zeros
+        assemblage = np.zeros([size, size])
+
+        # Add each element's stiffness matrix to the assemblage matrix
+        for ele in self.elements.values():
+            nodei_id = ele.nodei.id
+            nodej_id = ele.nodej.id
+
+            # Quadrant 1
+            # row: [ix, iy, iz], col: [ix, iy, iz]
+            for j in range(0, DOF):
+                for k in range(0, DOF):
+                    assemblage[
+                        DOF*nodei_id - DOF + j,
+                        DOF*nodei_id - DOF + k
+                    ] = assemblage[
+                        DOF*nodei_id - DOF + j,
+                        DOF*nodei_id - DOF + k
+                    ] + ele.K[j, k]
+
+            # Quadrant 2
+            # row:[ix, iy, iz], col:[jx, jy, jz]
+            for j in range(0, DOF):
+                for k in range(0, DOF):
+                    assemblage[
+                        DOF*nodei_id - DOF + j,
+                        DOF*nodej_id - DOF + k
+                    ] = assemblage[
+                        DOF*nodei_id - DOF + j,
+                        DOF*nodej_id - DOF + k
+                    ] + ele.K[j, k + DOF]
+
+            # Quadrant 3
+            # row:[jx, jy, jz], col:[ix, iy, iz]
+            for j in range(0, DOF):
+                for k in range(0, DOF):
+                    assemblage[
+                        DOF*nodej_id - DOF + j,
+                        DOF*nodei_id - DOF + k
+                    ] = assemblage[
+                        DOF*nodej_id - DOF + j,
+                        DOF*nodei_id - DOF + k
+                    ] + ele.K[j + DOF, k]
+
+            # Quadrant 4
+            # row:[jx, jy, jz], col:[jx, jy, jz]
+            for j in range(0, DOF):
+                for k in range(0, DOF):
+                    assemblage[
+                        DOF*nodej_id - DOF + j,
+                        DOF*nodej_id - DOF + k
+                    ] = assemblage[
+                        DOF*nodej_id - DOF + j,
+                        DOF*nodej_id - DOF + k
+                    ] + ele.K[j + DOF, k + DOF]
+
+        log.info('Finished calculating assemblage stiffness matrix.')
+        self.K = assemblage
 
     def displacement():
         pass
