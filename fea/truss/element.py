@@ -30,7 +30,7 @@ class Element():
         Direction cosine in y.
     Cz : float
         Direction cosine in z.
-    K : matrix
+    K : ndarray
         Stiffness matrix for the element in global coordinates.
 
     Methods
@@ -69,7 +69,7 @@ class Element():
         Cz = self.Cz
 
         log.debug(f'Calculating element[{self.id}] stiffness matrix.')
-        self.K = E * A / L * np.matrix([
+        self.K = E * A / L * np.array([
             [ Cx**2,  Cx*Cy,  Cx*Cz, -Cx**2, -Cx*Cy, -Cx*Cz],
             [ Cx*Cy,  Cy**2,  Cy*Cz, -Cx*Cy, -Cy**2, -Cy*Cz],
             [ Cx*Cz,  Cy*Cz,  Cz**2, -Cx*Cz, -Cy*Cz, -Cz**2],

@@ -1,5 +1,6 @@
 from fea.truss.element import Element
 from fea.truss.node import Node
+import numpy as np
 
 
 def test_element_init():
@@ -13,4 +14,15 @@ def test_element_init():
 
 
 def test_element_stiffness():
-    pass
+    ni = Node(1, 0, 0, 0)
+    nj = Node(2, 500, 500, 0)
+    ele = Element(1, ni, nj, 20000, 200)
+    ele.stiffness()
+    assert (np.round(ele.K) == np.array([
+        [ 2828,  2828,  0, -2828, -2828, 0],
+        [ 2828,  2828,  0, -2828, -2828, 0],
+        [    0,     0,  0,     0,     0, 0],
+        [-2828, -2828,  0,  2828,  2828, 0],
+        [-2828, -2828,  0,  2828,  2828, 0],
+        [    0,     0,  0,     0,     0, 0]
+    ])).all()
