@@ -40,12 +40,12 @@ class Element():
 
     """
 
-    def __init__(self, id, nodei, nodej, E, A):
+    def __init__(self, id, nodei, nodej, mat_prop):
         self.id = id
         self.nodei = nodei
         self.nodej = nodej
-        self.E = E
-        self.A = A
+        self.E = mat_prop['E']
+        self.A = mat_prop['A']
 
         # Calculated element properties.
         log.debug(f'Calculating element[{self.id}] length.')

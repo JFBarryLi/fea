@@ -18,6 +18,7 @@ class Truss():
     mat_prop : dict
         Material property dictionary.
         Young's modulus, and cross-sectional area.
+        {ele_id : {E: ..., A: ...}, ...}
     nodal_coords : dict
         Dictionary representing the coordinates of each node.
         {node_id: {x: ..., y: ..., z: ...}, ...}
@@ -60,8 +61,9 @@ class Truss():
         boundary_conditions
     ):
         log.info('Initializing truss solver.')
-        self.E = mat_prop['E']
-        self.A = mat_prop['A']
+        # A truss structure have 3 degrees of freedom.
+        self.DOF = 3
+        self.mat_prop = mat_prop
         self.nodal_coords = nodal_coords
         self.connectivity = connectivity
         self.force_vector = force_vector
@@ -89,15 +91,13 @@ class Truss():
                 ele,
                 self.nodes[self.connectivity[ele]['i']],
                 self.nodes[self.connectivity[ele]['j']],
-                self.E,
-                self.A
+                self.mat_prop[ele]
             )
             self.elements[ele].stiffness()
 
     def assemblage(self):
         log.info('Calculating assemblage stiffness matrix.')
-        # A truss structure have 3 degrees of freedom.
-        DOF = 3
+        DOF = self.DOF
         size = len(self.nodes) * DOF
 
         # Initialize assemblage matrix to zeros
@@ -159,8 +159,10 @@ class Truss():
         log.info('Finished calculating assemblage stiffness matrix.')
         self.K = assemblage
 
-    def displacement():
-        pass
+    def displacement(self):
+        log.info('Calculating displacement of each node.')
+        DOF = self.DOF
+        size = len(self.nodes) * DOF
 
-    def stress():
+    def stress(self):
         pass

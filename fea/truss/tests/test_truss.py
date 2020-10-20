@@ -1,7 +1,7 @@
 from fea.truss.truss import Truss
 
 # TODO: Find a textbook example to use as test cases.
-mat_prop = {'E': 1, 'A': 1}
+mat_prop = {1: {'E': 1, 'A': 1}}
 nodal_coords = {1: {'x': 0, 'y': 0, 'z': 0}, 2: {'x': 3, 'y': 4, 'z': 0}}
 connectivity = {1: {'i': 1, 'j': 2}}
 force_vector = {}
@@ -35,7 +35,7 @@ def test_truss_create_elements():
 
 def test_truss_assemblage():
     t.assemblage()
-    assert t.any()
+    assert t.K.any()
 
 
 def test_truss_displacement():
