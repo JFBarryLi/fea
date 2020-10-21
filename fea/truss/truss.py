@@ -164,5 +164,8 @@ class Truss():
         DOF = self.DOF
         size = len(self.nodes) * DOF
 
+        # Initialize displacement matrix to zeros
+        d = np.zeros([size, 1])
+
     def stress(self):
         pass
