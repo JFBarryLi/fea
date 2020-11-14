@@ -111,3 +111,21 @@ def test_truss_stress():
         2: 1581.1,
         3: -2121.3
     }
+
+
+def test_calculate_deformed_nodal_coords():
+    t.calculate_deformed_nodal_coords()
+    assert {key:
+        {
+            k: round(
+                t.deformed_nodal_coords[key][k],
+                4
+            ) for k in t.deformed_nodal_coords[key]
+        }
+        for key in t.deformed_nodal_coords
+    } == {
+        0: {'x': 0.0, 'y': 0.0, 'z': 0.0},
+        1: {'x': 100.0, 'y': 0.0, 'z': 0.0},
+        2: {'x': 50.0265, 'y': 50.0088, 'z': 0.0},
+        3: {'x': 200.3479, 'y': 99.4400, 'z': 0.0}
+    }

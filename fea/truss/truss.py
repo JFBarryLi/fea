@@ -22,6 +22,9 @@ class Truss():
     nodal_coords : dict
         Dictionary representing the coordinates of each node.
         {node_id: {x: ..., y: ..., z: ...}, ...}
+    deformed_nodal_coords : dict
+        Dictionary representing the deformed coordinates of each node.
+        {node_id: {x: ..., y: ..., z: ...}, ...}
     connectivity : dict
         Dictionary representing the 2 nodes associated with each element.
         {ele_id : {i: nodei_id, j: nodej_id}, ...}
@@ -33,7 +36,7 @@ class Truss():
         {node_id: {0: ..., 1:..., 2: ...}, ...}
     K : ndarray
         Stiffness matrix for the truss.
-    Q: ndarray
+    Q : ndarray
         Displacement matrix for the truss.
     nodes : dict
         A dictionary containing the nodes.
@@ -65,6 +68,7 @@ class Truss():
         self.DOF = 3
         self.mat_prop = mat_prop
         self.nodal_coords = nodal_coords
+        self.deformed_nodal_coords = nodal_coords
         self.connectivity = connectivity
         self.force_vector = force_vector
         self.boundary_conditions = boundary_conditions
@@ -227,3 +231,15 @@ class Truss():
 
             # Local element stress
             self.stresses[e] = ele.E * (qj_local - qi_local) / ele.L
+
+    def calculate_deformed_nodal_coords(self):
+        DOF = self.DOF
+        log.info('Calculating the deformed nodal coordinates.')
+        for q in range(0, int(len(self.Q) / DOF)):
+            qx = self.Q[q*DOF + 0][0]
+            qy = self.Q[q*DOF + 1][0]
+            qz = self.Q[q*DOF + 2][0]
+
+            self.deformed_nodal_coords[q]['x'] += qx
+            self.deformed_nodal_coords[q]['y'] += qy
+            self.deformed_nodal_coords[q]['z'] += qz
