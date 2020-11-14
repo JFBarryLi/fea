@@ -27,10 +27,10 @@ class Truss():
         {ele_id : {i: nodei_id, j: nodej_id}, ...}
     force_vector : dict
         Dictionary representing the external force input onto the truss.
-        {node_id: {x: ..., y:..., z: ...}, ...}
+        {node_id: {0: ..., 1:..., 2: ...}, ...}
     boundary_conditions : dict
         Dictionary representing the boundary condition constraints.
-        {node_id: {x: ..., y:..., z: ...}, ...}
+        {node_id: {0: ..., 1:..., 2: ...}, ...}
     K : ndarray
         Stiffness matrix for the truss.
     nodes : dict
@@ -69,6 +69,7 @@ class Truss():
         self.force_vector = force_vector
         self.boundary_conditions = boundary_conditions
         self.K = np.zeros([])
+        self.Q = np.zeros([])
         self.nodes = {}
         self.elements = {}
         self.disp_vector = {}
@@ -113,11 +114,11 @@ class Truss():
             for j in range(0, DOF):
                 for k in range(0, DOF):
                     assemblage[
-                        DOF*nodei_id - DOF + j,
-                        DOF*nodei_id - DOF + k
+                        DOF*nodei_id + j,
+                        DOF*nodei_id + k
                     ] = assemblage[
-                        DOF*nodei_id - DOF + j,
-                        DOF*nodei_id - DOF + k
+                        DOF*nodei_id + j,
+                        DOF*nodei_id + k
                     ] + ele.K[j, k]
 
             # Quadrant 2
@@ -125,11 +126,11 @@ class Truss():
             for j in range(0, DOF):
                 for k in range(0, DOF):
                     assemblage[
-                        DOF*nodei_id - DOF + j,
-                        DOF*nodej_id - DOF + k
+                        DOF*nodei_id + j,
+                        DOF*nodej_id + k
                     ] = assemblage[
-                        DOF*nodei_id - DOF + j,
-                        DOF*nodej_id - DOF + k
+                        DOF*nodei_id + j,
+                        DOF*nodej_id + k
                     ] + ele.K[j, k + DOF]
 
             # Quadrant 3
@@ -137,11 +138,11 @@ class Truss():
             for j in range(0, DOF):
                 for k in range(0, DOF):
                     assemblage[
-                        DOF*nodej_id - DOF + j,
-                        DOF*nodei_id - DOF + k
+                        DOF*nodej_id + j,
+                        DOF*nodei_id + k
                     ] = assemblage[
-                        DOF*nodej_id - DOF + j,
-                        DOF*nodei_id - DOF + k
+                        DOF*nodej_id + j,
+                        DOF*nodei_id + k
                     ] + ele.K[j + DOF, k]
 
             # Quadrant 4
@@ -149,11 +150,11 @@ class Truss():
             for j in range(0, DOF):
                 for k in range(0, DOF):
                     assemblage[
-                        DOF*nodej_id - DOF + j,
-                        DOF*nodej_id - DOF + k
+                        DOF*nodej_id + j,
+                        DOF*nodej_id + k
                     ] = assemblage[
-                        DOF*nodej_id - DOF + j,
-                        DOF*nodej_id - DOF + k
+                        DOF*nodej_id + j,
+                        DOF*nodej_id + k
                     ] + ele.K[j + DOF, k + DOF]
 
         log.info('Finished calculating assemblage stiffness matrix.')
@@ -164,8 +165,43 @@ class Truss():
         DOF = self.DOF
         size = len(self.nodes) * DOF
 
-        # Initialize displacement matrix to zeros
-        d = np.zeros([size, 1])
+        # Find indices to remove from the assemblage matrix
+        constraints = []
+        for node in self.boundary_conditions:
+            for freedom in self.boundary_conditions[node]:
+                if self.boundary_conditions[node][freedom] == 0:
+                    constraints.append(DOF*node + freedom)
+
+        # Constructing the force matrix
+        forces = np.zeros([size, 1])
+        for node in self.force_vector:
+            for freedom in self.force_vector[node]:
+                forces[DOF*node + freedom] = self.force_vector[node][freedom]
+
+        K_reduced = np.delete(self.K, constraints, axis=0)
+        K_reduced = np.delete(K_reduced, constraints, axis=1)
+        forces_reduced = np.delete(forces, constraints, axis=0)
+
+        # Solve the reduced linear system
+        Q_zero = np.zeros([size, 1])
+        Q = np.linalg.solve(K_reduced, forces_reduced)
+
+        # Reconstruct displacement vector back to original size
+        total_dof_index = np.linspace(
+            0,
+            size - 1,
+            num=size,
+            dtype=int
+        )
+        dof_index_without_constraints = np.setdiff1d(
+            total_dof_index,
+            constraints
+        )
+
+        for i in range(0, len(Q)):
+            Q_zero[dof_index_without_constraints[i]] = Q[i]
+
+        self.Q = Q_zero
 
     def stress(self):
         pass

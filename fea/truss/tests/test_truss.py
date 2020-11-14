@@ -2,29 +2,29 @@ import numpy as np
 from fea.truss.truss import Truss
 
 mat_prop = {
+    0: {'E': 2000000, 'A': 2},
     1: {'E': 2000000, 'A': 2},
-    2: {'E': 2000000, 'A': 2},
-    3: {'E': 2000000, 'A': 1},
-    4: {'E': 2000000, 'A': 1}
+    2: {'E': 2000000, 'A': 1},
+    3: {'E': 2000000, 'A': 1}
 }
 nodal_coords = {
-    1: {'x': 0, 'y': 0, 'z': 0},
-    2: {'x': 100, 'y': 0, 'z': 0},
-    3: {'x': 50, 'y': 50, 'z': 0},
-    4: {'x': 200, 'y': 100, 'z': 0}
+    0: {'x': 0, 'y': 0, 'z': 0},
+    1: {'x': 100, 'y': 0, 'z': 0},
+    2: {'x': 50, 'y': 50, 'z': 0},
+    3: {'x': 200, 'y': 100, 'z': 0}
 }
 connectivity = {
-    1: {'i': 1, 'j': 3},
-    2: {'i': 3, 'j': 2},
-    3: {'i': 3, 'j': 4},
-    4: {'i': 2, 'j': 4}
+    0: {'i': 0, 'j': 2},
+    1: {'i': 2, 'j': 1},
+    2: {'i': 2, 'j': 3},
+    3: {'i': 1, 'j': 3}
 }
 force_vector = {
-    4: {'x': 0, 'y': -1000, 'z': 0}
+    3: {0: 0, 1: -1000, 2: 0}
 }
 boundary_conditions = {
-    1: {'x': 0, 'y': 0, 'z': 0},
-    2: {'x': 0, 'y': 0, 'z': 0}
+    0: {0: 0, 1: 0, 2: 0},
+    1: {0: 0, 1: 0, 2: 0}
 }
 
 t = Truss(
@@ -38,22 +38,22 @@ t = Truss(
 
 def test_truss_creation():
     assert t.nodal_coords == {
-        1: {'x': 0, 'y': 0, 'z': 0},
-        2: {'x': 100, 'y': 0, 'z': 0},
-        3: {'x': 50, 'y': 50, 'z': 0},
-        4: {'x': 200, 'y': 100, 'z': 0}
+        0: {'x': 0, 'y': 0, 'z': 0},
+        1: {'x': 100, 'y': 0, 'z': 0},
+        2: {'x': 50, 'y': 50, 'z': 0},
+        3: {'x': 200, 'y': 100, 'z': 0}
     }
 
 
 def test_truss_create_nodes():
     t.create_nodes()
-    assert t.nodes[2].x == 100
+    assert t.nodes[1].x == 100
 
 
 def test_truss_create_elements():
     t.create_elements()
-    assert t.elements[1].nodej.y == 50
-    assert (np.round(t.elements[1].K) == np.array([
+    assert t.elements[0].nodej.y == 50
+    assert (np.round(t.elements[0].K) == np.array([
         [ 28284,  28284,  0, -28284, -28284, 0],
         [ 28284,  28284,  0, -28284, -28284, 0],
         [     0,      0,  0,      0,      0, 0],
@@ -82,7 +82,8 @@ def test_truss_assemblage():
 
 
 def test_truss_displacement():
-    pass
+    t.displacement()
+    assert t.Q == [1]
 
 
 def test_truss_stress():
