@@ -166,6 +166,7 @@ class Truss():
         size = len(self.nodes) * DOF
 
         # Find indices to remove from the assemblage matrix
+        log.info('Reducing the matrices based on the boundary conditions.')
         constraints = []
         for node in self.boundary_conditions:
             for freedom in self.boundary_conditions[node]:
@@ -173,6 +174,7 @@ class Truss():
                     constraints.append(DOF*node + freedom)
 
         # Constructing the force matrix
+        log.info('Constructing the force matrix.')
         forces = np.zeros([size, 1])
         for node in self.force_vector:
             for freedom in self.force_vector[node]:
@@ -183,10 +185,12 @@ class Truss():
         forces_reduced = np.delete(forces, constraints, axis=0)
 
         # Solve the reduced linear system
+        log.info('Solving the linear system.')
         Q_zero = np.zeros([size, 1])
         Q = np.linalg.solve(K_reduced, forces_reduced)
 
         # Reconstruct displacement vector back to original size
+        log.info('Reconstructing the displacement vector.')
         total_dof_index = np.linspace(
             0,
             size - 1,

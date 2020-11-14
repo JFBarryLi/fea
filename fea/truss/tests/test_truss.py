@@ -24,7 +24,9 @@ force_vector = {
 }
 boundary_conditions = {
     0: {0: 0, 1: 0, 2: 0},
-    1: {0: 0, 1: 0, 2: 0}
+    1: {0: 0, 1: 0, 2: 0},
+    2: {2: 0},
+    3: {2: 0}
 }
 
 t = Truss(
@@ -65,7 +67,7 @@ def test_truss_create_elements():
 
 def test_truss_assemblage():
     t.assemblage()
-    assert (np.round(t.K) == np.array([
+    assert np.equal(np.round(t.K), np.array([
         [ 28284,  28284, 0,      0,      0, 0, -28284, -28284, 0,      0,      0, 0],
         [ 28284,  28284, 0,      0,      0, 0, -28284, -28284, 0,      0,      0, 0],
         [     0,      0, 0,      0,      0, 0,      0,      0, 0,      0,      0, 0],
@@ -83,7 +85,20 @@ def test_truss_assemblage():
 
 def test_truss_displacement():
     t.displacement()
-    assert t.Q == [1]
+    assert np.equal(np.round(t.Q, 4), np.array([
+        [      0],
+        [      0],
+        [      0],
+        [      0],
+        [      0],
+        [      0],
+        [ 0.0265],
+        [ 0.0088],
+        [      0],
+        [ 0.3479],
+        [-0.5600],
+        [      0]
+    ])).all()
 
 
 def test_truss_stress():
