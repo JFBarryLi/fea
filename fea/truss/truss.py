@@ -33,13 +33,13 @@ class Truss():
         {node_id: {0: ..., 1:..., 2: ...}, ...}
     K : ndarray
         Stiffness matrix for the truss.
+    Q: ndarray
+        Displacement matrix for the truss.
     nodes : dict
         A dictionary containing the nodes.
     elements : dict
         A dictionary containing the elements.
-    disp_vector : dict
-        Dictionary representing the displacement of each node.
-    stress: dict
+    stresses: dict
         Dictionary representing the stresses in the truss.
 
     Methods
@@ -73,7 +73,7 @@ class Truss():
         self.nodes = {}
         self.elements = {}
         self.disp_vector = {}
-        self.stress = {}
+        self.stresses = {}
 
     def create_nodes(self):
         log.info('Instantiating truss nodes.')
@@ -208,4 +208,22 @@ class Truss():
         self.Q = Q_zero
 
     def stress(self):
-        pass
+        DOF = self.DOF
+        log.info('Computing axial stress for each element.')
+        for e in self.elements:
+            ele = self.elements[e]
+
+            # Displacements in Global Coordinates
+            qix = self.Q[ele.nodei.id*DOF + 0][0]
+            qiy = self.Q[ele.nodei.id*DOF + 1][0]
+            qiz = self.Q[ele.nodei.id*DOF + 2][0]
+            qjx = self.Q[ele.nodej.id*DOF + 0][0]
+            qjy = self.Q[ele.nodej.id*DOF + 1][0]
+            qjz = self.Q[ele.nodej.id*DOF + 2][0]
+
+            # Displacements in Local Coordinates
+            qi_local = qix*ele.Cx + qiy*ele.Cy + qiz*ele.Cz
+            qj_local = qjx*ele.Cx + qjy*ele.Cy + qjz*ele.Cz
+
+            # Local element stress
+            self.stresses[e] = ele.E * (qj_local - qi_local) / ele.L

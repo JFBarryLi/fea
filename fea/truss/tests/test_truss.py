@@ -102,4 +102,12 @@ def test_truss_displacement():
 
 
 def test_truss_stress():
-    pass
+    t.stress()
+    assert {
+        key: round(t.stresses[key], 1) for key in t.stresses
+    } == {
+        0: 707.1,
+        1: -353.6,
+        2: 1581.1,
+        3: -2121.3
+    }
