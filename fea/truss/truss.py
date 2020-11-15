@@ -66,6 +66,7 @@ class Truss():
     assemblage()
     displacement()
     stress()
+    calculate_deformed_nodal_coords()
 
     """
 
