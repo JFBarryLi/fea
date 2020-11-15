@@ -9,5 +9,6 @@ setup(
         'uvicorn==0.12.2',
         'pytest==6.1.1',
         'numpy==1.19.2',
+        'requests==2.25.0',
     ],
 )

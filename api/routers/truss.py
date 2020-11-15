@@ -1,8 +1,9 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
-from typing import List, Dict
+from typing import Dict, Optional
 
 from fea.truss.truss import Truss
+from .truss_example import TrussExampleInput
 
 router = APIRouter()
 
@@ -13,10 +14,6 @@ class EleProp(BaseModel):
     A: float
 
 
-class MatProps(BaseModel):
-    __root__: Dict[int, EleProp]
-
-
 class Node(BaseModel):
     index: int
     x: float
@@ -24,18 +21,10 @@ class Node(BaseModel):
     z: float
 
 
-class NodalCoords(BaseModel):
-    __root__: Dict[str, Node]
-
-
 class Connect(BaseModel):
     index: int
-    i: int
-    j: int
-
-
-class Connectivity(BaseModel):
-    __root__: Dict[str, Connect]
+    i: str
+    j: str
 
 
 class Vector(BaseModel):
@@ -43,34 +32,28 @@ class Vector(BaseModel):
     value: float
 
 
-class Vectors(BaseModel):
-    __root__: Dict[str, Vector]
-
-
 class NodeForces(BaseModel):
     index: int
-    forces: Vectors
+    forces: Dict[str, Vector]
 
 
 class NodeBc(BaseModel):
     index: int
-    bc: Vectors
-
-
-class ForceVector(BaseModel):
-    __root__: Dict[str, NodeForces]
-
-
-class BoundaryConditions(BaseModel):
-    __root__: Dict[str, NodeBc]
+    bc: Dict[str, Vector]
 
 
 class TrussData(BaseModel):
-    matProp: MatProps
-    nodalCoords: NodalCoords
-    connectivity: Connectivity
-    forceVector: ForceVector
-    boundaryConditions: BoundaryConditions
+    matProp: Dict[str, EleProp]
+    nodalCoords: Dict[str, Node]
+    connectivity: Dict[str, Connect]
+    forceVector: Dict[str, NodeForces]
+    boundaryConditions: Dict[str, NodeBc]
+    stresses: Optional[Dict[str, float]] = None
+
+    class Config:
+        schema_extra = {
+            "example": TrussExampleInput
+        }
 
 
 @router.get('/')
@@ -78,6 +61,19 @@ def truss_root():
     return 'Truss Solver'
 
 
-@router.post('/')
+@router.post('/', response_model=TrussData)
 def truss_solve(truss: TrussData):
-    return TrussData
+    truss_dict = truss.dict()
+    t = Truss(
+        truss_dict['matProp'],
+        truss_dict['nodalCoords'],
+        truss_dict['connectivity'],
+        truss_dict['forceVector'],
+        truss_dict['boundaryConditions']
+    )
+
+    t.solve_truss()
+
+    truss.nodalCoords = t.deformed_nodal_coords
+    truss.stresses = t.stresses
+    return truss

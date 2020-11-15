@@ -1,4 +1,5 @@
 import logging
+from copy import deepcopy
 import numpy as np
 from .node import Node
 from .element import Element
@@ -67,6 +68,7 @@ class Truss():
     displacement()
     stress()
     calculate_deformed_nodal_coords()
+    solve_truss()
 
     """
 
@@ -83,7 +85,7 @@ class Truss():
         self.DOF = 3
         self.mat_prop = mat_prop
         self.nodal_coords = nodal_coords
-        self.deformed_nodal_coords = nodal_coords
+        self.deformed_nodal_coords = deepcopy(nodal_coords)
         self.connectivity = connectivity
         self.force_vector = force_vector
         self.boundary_conditions = boundary_conditions
@@ -274,3 +276,13 @@ class Truss():
             self.deformed_nodal_coords[node_id]['x'] += qx
             self.deformed_nodal_coords[node_id]['y'] += qy
             self.deformed_nodal_coords[node_id]['z'] += qz
+
+    def solve_truss(self):
+        log.info('Solving truss.')
+        self.create_nodes()
+        self.create_elements()
+        self.assemblage()
+        self.displacement()
+        self.stress()
+        self.calculate_deformed_nodal_coords()
+        return self

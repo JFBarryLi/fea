@@ -94,7 +94,7 @@ def test_truss_create_elements():
         [ 28284,  28284,  0, -28284, -28284, 0],
         [ 28284,  28284,  0, -28284, -28284, 0],
         [     0,      0,  0,      0,      0, 0],
-        [-28284, -28284,  0,  28284,  28284, 0],
+        [-28284, -28284 ,  0,  28284,  28284, 0],
         [-28284, -28284,  0,  28284,  28284, 0],
         [     0,      0,  0,      0,      0, 0]
     ])).all()
@@ -150,14 +150,42 @@ def test_truss_stress():
 
 def test_calculate_deformed_nodal_coords():
     t.calculate_deformed_nodal_coords()
-    assert {key:
-        {
-            k: round(
-                t.deformed_nodal_coords[key][k],
-                4
-            ) for k in t.deformed_nodal_coords[key]
-        }
-        for key in t.deformed_nodal_coords
+    assert {
+        key:
+            {
+                k: round(
+                    t.deformed_nodal_coords[key][k],
+                    4
+                ) for k in t.deformed_nodal_coords[key]
+            }
+            for key in t.deformed_nodal_coords
+    } == {
+        'node1': {'index': 0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
+        'node2': {'index': 1, 'x': 100.0, 'y': 0.0, 'z': 0.0},
+        'node3': {'index': 2, 'x': 50.0265, 'y': 50.0088, 'z': 0.0},
+        'node4': {'index': 3, 'x': 200.3479, 'y': 99.4400, 'z': 0.0}
+    }
+
+
+def test_solve_truss():
+    t2 = Truss(
+        mat_prop,
+        nodal_coords,
+        connectivity,
+        force_vector,
+        boundary_conditions
+    )
+    t2.solve_truss()
+
+    assert {
+        key:
+            {
+                k: round(
+                    t2.deformed_nodal_coords[key][k],
+                    4
+                ) for k in t2.deformed_nodal_coords[key]
+            }
+            for key in t2.deformed_nodal_coords
     } == {
         'node1': {'index': 0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
         'node2': {'index': 1, 'x': 100.0, 'y': 0.0, 'z': 0.0},
