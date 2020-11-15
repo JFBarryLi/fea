@@ -18,22 +18,32 @@ class Truss():
     mat_prop : dict
         Material property dictionary.
         Young's modulus, and cross-sectional area.
-        {ele_id : {E: ..., A: ...}, ...}
+        {'ele_id' : {'index': ..., 'E': ..., 'A': ...}, ...}
     nodal_coords : dict
         Dictionary representing the coordinates of each node.
-        {node_id: {x: ..., y: ..., z: ...}, ...}
+        {'node_id': {'index': ..., 'x': ..., 'y': ..., 'z': ...}, ...}
     deformed_nodal_coords : dict
         Dictionary representing the deformed coordinates of each node.
-        {node_id: {x: ..., y: ..., z: ...}, ...}
+        {'node_id': {'index': ..., 'x': ..., 'y': ..., 'z': ...}, ...}
     connectivity : dict
         Dictionary representing the 2 nodes associated with each element.
-        {ele_id : {i: nodei_id, j: nodej_id}, ...}
+        {'ele_id' : {'index': ..., 'i': 'nodei_id', 'j': 'nodej_id'}, ...}
     force_vector : dict
         Dictionary representing the external force input onto the truss.
-        {node_id: {0: ..., 1:..., 2: ...}, ...}
+        {'node_id': {
+            'index': ...,
+            'u1': {'index': ..., 'value': ...},
+            'u2': {'index': ..., 'value': ...},
+            'u3': {'index': ..., 'value': ...},
+        }, ...}
     boundary_conditions : dict
         Dictionary representing the boundary condition constraints.
-        {node_id: {0: ..., 1:..., 2: ...}, ...}
+        {'node_id': {
+            'index': ...,
+            'u1': {'index': ..., 'value': ...},
+            'u2': {'index': ..., 'value': ...},
+            'u3': {'index': ..., 'value': ...},
+        }, ...}
     K : ndarray
         Stiffness matrix for the truss.
     Q : ndarray
@@ -84,6 +94,7 @@ class Truss():
         for node in self.nodal_coords:
             self.nodes[node] = Node(
                 node,
+                self.nodal_coords[node]['index'],
                 self.nodal_coords[node]['x'],
                 self.nodal_coords[node]['y'],
                 self.nodal_coords[node]['z']
@@ -94,6 +105,7 @@ class Truss():
         for ele in self.connectivity:
             self.elements[ele] = Element(
                 ele,
+                self.connectivity[ele]['index'],
                 self.nodes[self.connectivity[ele]['i']],
                 self.nodes[self.connectivity[ele]['j']],
                 self.mat_prop[ele]
@@ -110,19 +122,19 @@ class Truss():
 
         # Add each element's stiffness matrix to the assemblage matrix
         for ele in self.elements.values():
-            nodei_id = ele.nodei.id
-            nodej_id = ele.nodej.id
+            nodei_index = ele.nodei.index
+            nodej_index = ele.nodej.index
 
             # Quadrant 1
             # row: [ix, iy, iz], col: [ix, iy, iz]
             for j in range(0, DOF):
                 for k in range(0, DOF):
                     assemblage[
-                        DOF*nodei_id + j,
-                        DOF*nodei_id + k
+                        DOF*nodei_index + j,
+                        DOF*nodei_index + k
                     ] = assemblage[
-                        DOF*nodei_id + j,
-                        DOF*nodei_id + k
+                        DOF*nodei_index + j,
+                        DOF*nodei_index + k
                     ] + ele.K[j, k]
 
             # Quadrant 2
@@ -130,11 +142,11 @@ class Truss():
             for j in range(0, DOF):
                 for k in range(0, DOF):
                     assemblage[
-                        DOF*nodei_id + j,
-                        DOF*nodej_id + k
+                        DOF*nodei_index + j,
+                        DOF*nodej_index + k
                     ] = assemblage[
-                        DOF*nodei_id + j,
-                        DOF*nodej_id + k
+                        DOF*nodei_index + j,
+                        DOF*nodej_index + k
                     ] + ele.K[j, k + DOF]
 
             # Quadrant 3
@@ -142,11 +154,11 @@ class Truss():
             for j in range(0, DOF):
                 for k in range(0, DOF):
                     assemblage[
-                        DOF*nodej_id + j,
-                        DOF*nodei_id + k
+                        DOF*nodej_index + j,
+                        DOF*nodei_index + k
                     ] = assemblage[
-                        DOF*nodej_id + j,
-                        DOF*nodei_id + k
+                        DOF*nodej_index + j,
+                        DOF*nodei_index + k
                     ] + ele.K[j + DOF, k]
 
             # Quadrant 4
@@ -154,11 +166,11 @@ class Truss():
             for j in range(0, DOF):
                 for k in range(0, DOF):
                     assemblage[
-                        DOF*nodej_id + j,
-                        DOF*nodej_id + k
+                        DOF*nodej_index + j,
+                        DOF*nodej_index + k
                     ] = assemblage[
-                        DOF*nodej_id + j,
-                        DOF*nodej_id + k
+                        DOF*nodej_index + j,
+                        DOF*nodej_index + k
                     ] + ele.K[j + DOF, k + DOF]
 
         log.info('Finished calculating assemblage stiffness matrix.')
@@ -173,16 +185,26 @@ class Truss():
         log.info('Reducing the matrices based on the boundary conditions.')
         constraints = []
         for node in self.boundary_conditions:
+            node_index = self.boundary_conditions[node]['index']
             for freedom in self.boundary_conditions[node]:
-                if self.boundary_conditions[node][freedom] == 0:
-                    constraints.append(DOF*node + freedom)
+                if freedom == 'index':
+                    continue
+                freedom_index = self.boundary_conditions[node][freedom]['index']
+                if self.boundary_conditions[node][freedom]['value'] == 0:
+                    constraints.append(DOF*node_index + freedom_index)
 
         # Constructing the force matrix
         log.info('Constructing the force matrix.')
         forces = np.zeros([size, 1])
         for node in self.force_vector:
+            node_index = self.boundary_conditions[node]['index']
             for freedom in self.force_vector[node]:
-                forces[DOF*node + freedom] = self.force_vector[node][freedom]
+                if freedom == 'index':
+                    continue
+                freedom_index = self.force_vector[node][freedom]['index']
+                forces[
+                    DOF*node_index + freedom_index
+                ] = self.force_vector[node][freedom]['value']
 
         K_reduced = np.delete(self.K, constraints, axis=0)
         K_reduced = np.delete(K_reduced, constraints, axis=1)
@@ -218,12 +240,12 @@ class Truss():
             ele = self.elements[e]
 
             # Displacements in Global Coordinates
-            qix = self.Q[ele.nodei.id*DOF + 0][0]
-            qiy = self.Q[ele.nodei.id*DOF + 1][0]
-            qiz = self.Q[ele.nodei.id*DOF + 2][0]
-            qjx = self.Q[ele.nodej.id*DOF + 0][0]
-            qjy = self.Q[ele.nodej.id*DOF + 1][0]
-            qjz = self.Q[ele.nodej.id*DOF + 2][0]
+            qix = self.Q[ele.nodei.index*DOF + 0][0]
+            qiy = self.Q[ele.nodei.index*DOF + 1][0]
+            qiz = self.Q[ele.nodei.index*DOF + 2][0]
+            qjx = self.Q[ele.nodej.index*DOF + 0][0]
+            qjy = self.Q[ele.nodej.index*DOF + 1][0]
+            qjz = self.Q[ele.nodej.index*DOF + 2][0]
 
             # Displacements in Local Coordinates
             qi_local = qix*ele.Cx + qiy*ele.Cy + qiz*ele.Cz
@@ -240,6 +262,12 @@ class Truss():
             qy = self.Q[q*DOF + 1][0]
             qz = self.Q[q*DOF + 2][0]
 
-            self.deformed_nodal_coords[q]['x'] += qx
-            self.deformed_nodal_coords[q]['y'] += qy
-            self.deformed_nodal_coords[q]['z'] += qz
+            node_id_map = {
+                self.deformed_nodal_coords[id]['index']:
+                    id for id in self.deformed_nodal_coords
+            }
+
+            node_id = node_id_map[q]
+            self.deformed_nodal_coords[node_id]['x'] += qx
+            self.deformed_nodal_coords[node_id]['y'] += qy
+            self.deformed_nodal_coords[node_id]['z'] += qz

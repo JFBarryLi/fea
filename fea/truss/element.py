@@ -12,8 +12,10 @@ class Element():
 
     Attributes
     ----------
-    id : int
+    id : str
         Id for the element.
+    index : int
+        Index for the element.
     nodei : Node
         Node object, representing node i.
     nodej : Node
@@ -40,8 +42,9 @@ class Element():
 
     """
 
-    def __init__(self, id, nodei, nodej, mat_prop):
+    def __init__(self, id, index, nodei, nodej, mat_prop):
         self.id = id
+        self.index = index
         self.nodei = nodei
         self.nodej = nodej
         self.E = mat_prop['E']

@@ -6,8 +6,10 @@ class Node():
 
     Attributes
     ----------
-    id : int
+    id : str
         Id of the node.
+    index : int
+        Index of the node.
     x : float
         x coordinate.
     y : float
@@ -17,8 +19,9 @@ class Node():
 
     """
 
-    def __init__(self, id, x, y, z):
+    def __init__(self, id, index, x, y, z):
         self.id = id
+        self.index = index
         self.x = x
         self.y = y
         self.z = z
