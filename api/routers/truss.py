@@ -8,6 +8,7 @@ router = APIRouter()
 
 
 class EleProp(BaseModel):
+    index: int
     E: float
     A: float
 
@@ -17,34 +18,51 @@ class MatProps(BaseModel):
 
 
 class Node(BaseModel):
+    index: int
     x: float
     y: float
     z: float
 
 
 class NodalCoords(BaseModel):
-    __root__: Dict[int, Node]
+    __root__: Dict[str, Node]
 
 
 class Connect(BaseModel):
+    index: int
     i: int
     j: int
 
 
 class Connectivity(BaseModel):
-    __root__: Dict[int, Connect]
+    __root__: Dict[str, Connect]
 
 
 class Vector(BaseModel):
-    __root__: Dict[int, float]
+    index: int
+    value: float
+
+
+class Vectors(BaseModel):
+    __root__: Dict[str, Vector]
+
+
+class NodeForces(BaseModel):
+    index: int
+    forces: Vectors
+
+
+class NodeBc(BaseModel):
+    index: int
+    bc: Vectors
 
 
 class ForceVector(BaseModel):
-    __root__: Dict[int, Vector]
+    __root__: Dict[str, NodeForces]
 
 
 class BoundaryConditions(BaseModel):
-    __root__: Dict[int, Vector]
+    __root__: Dict[str, NodeBc]
 
 
 class TrussData(BaseModel):

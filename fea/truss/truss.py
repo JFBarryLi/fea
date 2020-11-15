@@ -32,17 +32,21 @@ class Truss():
         Dictionary representing the external force input onto the truss.
         {'node_id': {
             'index': ...,
-            'u1': {'index': ..., 'value': ...},
-            'u2': {'index': ..., 'value': ...},
-            'u3': {'index': ..., 'value': ...},
+            'bc': {
+                'u1': {'index': ..., 'value': ...},
+                'u2': {'index': ..., 'value': ...},
+                'u3': {'index': ..., 'value': ...}
+            }
         }, ...}
     boundary_conditions : dict
         Dictionary representing the boundary condition constraints.
         {'node_id': {
             'index': ...,
-            'u1': {'index': ..., 'value': ...},
-            'u2': {'index': ..., 'value': ...},
-            'u3': {'index': ..., 'value': ...},
+            'bc': {
+                'u1': {'index': ..., 'value': ...},
+                'u2': {'index': ..., 'value': ...},
+                'u3': {'index': ..., 'value': ...}
+            }
         }, ...}
     K : ndarray
         Stiffness matrix for the truss.
@@ -186,11 +190,10 @@ class Truss():
         constraints = []
         for node in self.boundary_conditions:
             node_index = self.boundary_conditions[node]['index']
-            for freedom in self.boundary_conditions[node]:
-                if freedom == 'index':
-                    continue
-                freedom_index = self.boundary_conditions[node][freedom]['index']
-                if self.boundary_conditions[node][freedom]['value'] == 0:
+            for freedom in self.boundary_conditions[node]['bc']:
+                freedom_index = \
+                    self.boundary_conditions[node]['bc'][freedom]['index']
+                if self.boundary_conditions[node]['bc'][freedom]['value'] == 0:
                     constraints.append(DOF*node_index + freedom_index)
 
         # Constructing the force matrix
@@ -198,13 +201,12 @@ class Truss():
         forces = np.zeros([size, 1])
         for node in self.force_vector:
             node_index = self.boundary_conditions[node]['index']
-            for freedom in self.force_vector[node]:
-                if freedom == 'index':
-                    continue
-                freedom_index = self.force_vector[node][freedom]['index']
+            for freedom in self.force_vector[node]['forces']:
+                freedom_index = \
+                    self.force_vector[node]['forces'][freedom]['index']
                 forces[
                     DOF*node_index + freedom_index
-                ] = self.force_vector[node][freedom]['value']
+                ] = self.force_vector[node]['forces'][freedom]['value']
 
         K_reduced = np.delete(self.K, constraints, axis=0)
         K_reduced = np.delete(K_reduced, constraints, axis=1)

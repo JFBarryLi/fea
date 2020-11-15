@@ -25,32 +25,42 @@ connectivity = {
 force_vector = {
     'node4': {
         'index': 3,
-        'u1': {'index': 0, 'value': 0},
-        'u2': {'index': 1, 'value': -1000},
-        'u3': {'index': 2, 'value': 0}
+        'forces': {
+            'u1': {'index': 0, 'value': 0},
+            'u2': {'index': 1, 'value': -1000},
+            'u3': {'index': 2, 'value': 0}
+        }
     }
 }
 
 boundary_conditions = {
     'node1': {
         'index': 0,
-        'u1': {'index': 0, 'value': 0},
-        'u2': {'index': 1, 'value': 0},
-        'u3': {'index': 2, 'value': 0}
+        'bc': {
+            'u1': {'index': 0, 'value': 0},
+            'u2': {'index': 1, 'value': 0},
+            'u3': {'index': 2, 'value': 0}
+        }
     },
     'node2': {
         'index': 1,
-        'u1': {'index': 0, 'value': 0},
-        'u2': {'index': 1, 'value': 0},
-        'u3': {'index': 2, 'value': 0}
+        'bc': {
+            'u1': {'index': 0, 'value': 0},
+            'u2': {'index': 1, 'value': 0},
+            'u3': {'index': 2, 'value': 0}
+        }
     },
     'node3': {
         'index': 2,
-        'u3': {'index': 2, 'value': 0}
+        'bc': {
+            'u3': {'index': 2, 'value': 0}
+        }
     },
     'node4': {
         'index': 3,
-        'u3': {'index': 2, 'value': 0}
+        'bc': {
+            'u3': {'index': 2, 'value': 0}
+        }
     }
 }
 
