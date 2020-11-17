@@ -93,7 +93,6 @@ class Truss():
         self.Q = np.zeros([])
         self.nodes = {}
         self.elements = {}
-        self.disp_vector = {}
         self.stresses = {}
 
     def create_nodes(self):
@@ -203,7 +202,7 @@ class Truss():
         log.info('Constructing the force matrix.')
         forces = np.zeros([size, 1])
         for node in self.force_vector:
-            node_index = self.boundary_conditions[node]['index']
+            node_index = self.force_vector[node]['index']
             for freedom in self.force_vector[node]['forces']:
                 freedom_index = \
                     self.force_vector[node]['forces'][freedom]['index']
