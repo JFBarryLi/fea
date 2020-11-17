@@ -73,11 +73,11 @@ boundary_conditions = {
 }
 
 t = Truss(
-  mat_prop,
-  nodal_coords,
-  connectivity,
-  force_vector,
-  boundary_conditions
+    mat_prop,
+    nodal_coords,
+    connectivity,
+    force_vector,
+    boundary_conditions
 )
 
 t.solve_truss()
