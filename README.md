@@ -1,107 +1,100 @@
-# FEA_WebApp
+# fea-app
 
-REST API written with django REST framework
+fea-app is a Python package aimed to use finite element analysis to solve physical problems.
 
-Calculates stress and nodal displacements for a frame or truss structure using finite element analysis
+Currently implemented solvers are:
+- Truss
 
+Solvers that are on the immediate todo:
+- Frame
+- Plate
+- 3D Elements
 
-### API Endpoints
+## Installation
 
-#### fea/structure/input/
-
-Create an InputStructure, perform finite element analysis and return an OutputStructure
-
-Allow: OPTIONS, POST  
-Content-Type: application/json  
-
-Content payload example:
-```bash
-{
-	"moment_of_inertia_y":"20",
-	"moment_of_inertia_z":"10",
-	"cross_sectional_area":"10",
-	"y_max":"1",
-	"young_modulus":"100",
-	"shear_modulus":"50",
-	"torsional_constant":"30",
-	"connectivity_table":"{1 : [1, 2]}",
-	"nodal_coordinates":"{1 : [0,0], 2 : [0,1]}",
-	"boundary_conditions":"[ 0, 1, 2]",
-	"force_vector":"[0, 0, 0, 0, -1, 0]",
-	"frame_or_truss":"frame"
-}
+```shell
+pip install git+https://github.com/JFBarryLi/fea-app.git
 ```
 
-Parameters:
-  * moment_of_inertia_y : float [mm^4]  
-  * cross_sectional_area : float [mm^2]  
-  * y_max : float [mm]
-	+ Distance from neutral axis to surface in the y-direction
-  * young_modulus : float [MPa]  
-  * shear_modulus : float [MPa]
-  * torsional_constant : float [mm^4]
-  * connectivity_table : dict  
-	+ Dictionary representing the 2 nodes associated with each element  
-	{element_id : [nodei_id, nodej_id],...}  
-  * nodal_coordinates : dict  
-	+ Dictionary representing the coordinates of each node  
-	{node_id1 : [x1, y1],...}  
-  * boundary_conditions : list  
-	+ List representing the boundary conditions  
-	[0,15,22,...]  
-	+ The array determines which DOF are fixed  
-	+ For frame each node has 3 degree of freedom:  
-		+ index 0 correspond to node_1 x-direction  
-		+ index 1 correspond to node_1 y-direction  
-		+ index 2 correspond to node_1 theta  
-		+ index 3 correspond to node_2 x-direction ...  
-	+ For truss each node has 2 degree of freedom:  
-		+ index 0 correspond to node_1 x-direction  
-		+ index 1 correspond to node_1 y-direction  
-		+ index 2 correspond to node_2 x-direction ...  
-  * force_vector : list  
-	+ List representing the input force into the structure  
-	[fx1, fy1, M1, ...]  
-  * frame_or_truss : char  
-	+ Specifies which type of structure to create  
-  
-POST request to /input/ returns output_id that identifies the output structure
+### Local Development
 
-#### fea/structure/outout/output_id
-
-Retrieve OutputStructure corresponding to the InputStructure
-
-Allow: GET, OPTIONS  
-Content-Type: application/json
-
-Content example:
-```bash
-{
-    "nodal_coordinates": "{1: [0.0, 0.0], 2: [0.0, -3.2441318157838754]}",
-    "stress": "{1: [424.41318157838754]}"
-}
-```
-Output:
-  * nodal_coordinates : dict  
-	+ Dictionary representing the coordinates of each node  
-	{node_id1 : [x1, y1],...}
-  * stress : dict  
-	+ Dictionary representing the stress at each element  
-	{ele1 : [stress1],...}
-
-### Installation
-
-```bash
-git clone https://github.com/JFBarryLi/FEA2D_WebApp.git
-```
-
-Install the requirements:
-
-```bash
+```shell
+git clone https://github.com/JFBarryLi/fea-app.git
+python -m venv venv
+. venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Create the database:
-```bash
-python manage.py migrate
+## Usage
+
+### Truss Solver
+
+```Python
+from fea.truss.truss import Truss
+
+mat_prop = {
+    'ele1': {'index': 0, 'E': 2000000, 'A': 2},
+}
+
+nodal_coords = {
+    'node1': {'index': 0, 'x': 0, 'y': 0, 'z': 0},
+    'node2': {'index': 1, 'x': 0, 'y': 100, 'z': 0},
+}
+
+connectivity = {
+    'ele1': {'index': 0, 'i': 'node1', 'j': 'node2'},
+}
+
+force_vector = {
+    'node2': {
+        'index': 1,
+        'forces': {
+            'u2': {'index': 1, 'value': -10000},
+        }
+    }
+}
+
+boundary_conditions = {
+    'node1': {
+        'index': 0,
+        'bc': {
+            'u1': {'index': 0, 'value': 0},
+            'u2': {'index': 1, 'value': 0},
+            'u3': {'index': 2, 'value': 0},
+        }
+    },
+    'node2': {
+        'index': 1,
+        'bc': {
+            'u1': {'index': 0, 'value': 0},
+            'u3': {'index': 2, 'value': 0},
+        }
+    },
+}
+
+t = Truss(
+    mat_prop,
+    nodal_coords,
+    connectivity,
+    force_vector,
+    boundary_conditions
+)
+
+t.solve_truss()
+t.stresses
+t.deformed_nodal_coords
+```
+
+### Api
+
+```shell
+make run-api
+```
+
+To view api docs open your browser at <a href="http://localhost/docs" class="external-link" target="_blank">http://localhost/docs</a>.
+
+## Build
+
+```shell
+make build
 ```

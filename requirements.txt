@@ -1,5 +1,1 @@
-Django==2.1.7
-djangorestframework==3.9.0
-numpy==1.14.0
-virtualenv==16.2.0
-django-cors-headers==2.4.0
+.
