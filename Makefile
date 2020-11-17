@@ -8,4 +8,4 @@ build:
 	docker build -t fea-app .
 
 docker-run:
-	docker run -d --name fea-app fea-app:latest
+	docker run -d -p 5900:5900 --name fea-app fea-app:latest
