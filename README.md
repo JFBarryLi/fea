@@ -13,7 +13,7 @@ Solvers that are on the immediate todo:
 ## Installation
 
 ```shell
-pip install https://github.com/JFBarryLi/fea-app.git
+pip install git+https://github.com/JFBarryLi/fea-app.git
 ```
 
 ### Local Development
