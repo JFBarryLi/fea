@@ -19,36 +19,22 @@ class Truss():
     mat_prop : dict
         Material property dictionary.
         Young's modulus, and cross-sectional area.
-        {'ele_id' : {'index': ..., 'E': ..., 'A': ...}, ...}
+        {'ele_id' : {'E': ..., 'A': ...}, ...}
     nodal_coords : dict
         Dictionary representing the coordinates of each node.
-        {'node_id': {'index': ..., 'x': ..., 'y': ..., 'z': ...}, ...}
+        {'node_id': {'x': ..., 'y': ..., 'z': ...}, ...}
     deformed_nodal_coords : dict
         Dictionary representing the deformed coordinates of each node.
-        {'node_id': {'index': ..., 'x': ..., 'y': ..., 'z': ...}, ...}
+        {'node_id': {'x': ..., 'y': ..., 'z': ...}, ...}
     connectivity : dict
         Dictionary representing the 2 nodes associated with each element.
-        {'ele_id' : {'index': ..., 'i': 'nodei_id', 'j': 'nodej_id'}, ...}
-    force_vector : dict
-        Dictionary representing the external force input onto the truss.
-        {'node_id': {
-            'index': ...,
-            'bc': {
-                'u1': {'index': ..., 'value': ...},
-                'u2': {'index': ..., 'value': ...},
-                'u3': {'index': ..., 'value': ...}
-            }
-        }, ...}
-    boundary_conditions : dict
-        Dictionary representing the boundary condition constraints.
-        {'node_id': {
-            'index': ...,
-            'bc': {
-                'u1': {'index': ..., 'value': ...},
-                'u2': {'index': ..., 'value': ...},
-                'u3': {'index': ..., 'value': ...}
-            }
-        }, ...}
+        {'ele_id' : {'i': 'nodei_id', 'j': 'nodej_id'}, ...}
+    force_vector : list
+        List of dict representing the external force input onto the truss.
+        [{'node': ..., 'u1': ..., 'u2': ..., 'u3': ...}, ...]
+    boundary_conditions : list
+        List of dict representing the boundary condition constraints.
+        [{'node': ..., 'u1': ..., 'u2': ..., 'u3': ...}, ...]
     K : ndarray
         Stiffness matrix for the truss.
     Q : ndarray
@@ -97,26 +83,26 @@ class Truss():
 
     def create_nodes(self):
         log.info('Instantiating truss nodes.')
-        for node in self.nodal_coords:
-            self.nodes[node] = Node(
-                node,
-                self.nodal_coords[node]['index'],
-                self.nodal_coords[node]['x'],
-                self.nodal_coords[node]['y'],
-                self.nodal_coords[node]['z']
+        for index, (id, node) in enumerate(self.nodal_coords.items()):
+            self.nodes[id] = Node(
+                id,
+                index,
+                node['x'],
+                node['y'],
+                node['z']
             )
 
     def create_elements(self):
         log.info('Instantiating truss elements.')
-        for ele in self.connectivity:
-            self.elements[ele] = Element(
-                ele,
-                self.connectivity[ele]['index'],
-                self.nodes[self.connectivity[ele]['i']],
-                self.nodes[self.connectivity[ele]['j']],
-                self.mat_prop[ele]
+        for index, (id, ele) in enumerate(self.connectivity.items()):
+            self.elements[id] = Element(
+                id,
+                index,
+                self.nodes[ele['i']],
+                self.nodes[ele['j']],
+                self.mat_prop[id]
             )
-            self.elements[ele].stiffness()
+            self.elements[id].stiffness()
 
     def assemblage(self):
         log.info('Calculating assemblage stiffness matrix.')
@@ -190,25 +176,23 @@ class Truss():
         # Find indices to remove from the assemblage matrix
         log.info('Reducing the matrices based on the boundary conditions.')
         constraints = []
-        for node in self.boundary_conditions:
-            node_index = self.boundary_conditions[node]['index']
-            for freedom in self.boundary_conditions[node]['bc']:
-                freedom_index = \
-                    self.boundary_conditions[node]['bc'][freedom]['index']
-                if self.boundary_conditions[node]['bc'][freedom]['value'] == 0:
-                    constraints.append(DOF*node_index + freedom_index)
+        for bc in self.boundary_conditions:
+            node_index = self.nodes[bc['node']].index
+            if bc['u1']:
+                constraints.append(DOF*node_index + 0)
+            if bc['u2']:
+                constraints.append(DOF*node_index + 1)
+            if bc['u3']:
+                constraints.append(DOF*node_index + 2)
 
         # Constructing the force matrix
         log.info('Constructing the force matrix.')
         forces = np.zeros([size, 1])
-        for node in self.force_vector:
-            node_index = self.force_vector[node]['index']
-            for freedom in self.force_vector[node]['forces']:
-                freedom_index = \
-                    self.force_vector[node]['forces'][freedom]['index']
-                forces[
-                    DOF*node_index + freedom_index
-                ] = self.force_vector[node]['forces'][freedom]['value']
+        for f in self.force_vector:
+            node_index = self.nodes[f['node']].index
+            forces[DOF*node_index + 0] = f['u1']
+            forces[DOF*node_index + 1] = f['u2']
+            forces[DOF*node_index + 2] = f['u3']
 
         K_reduced = np.delete(self.K, constraints, axis=0)
         K_reduced = np.delete(K_reduced, constraints, axis=1)
@@ -266,9 +250,10 @@ class Truss():
             qy = self.Q[q*DOF + 1][0]
             qz = self.Q[q*DOF + 2][0]
 
+            # TODO: Revisit this index mapping.
             node_id_map = {
-                self.deformed_nodal_coords[id]['index']:
-                    id for id in self.deformed_nodal_coords
+                self.nodes[node].index:
+                    self.nodes[node].id for node in self.nodes
             }
 
             node_id = node_id_map[q]
