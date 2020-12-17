@@ -2,67 +2,36 @@ import numpy as np
 from fea.truss.truss import Truss
 
 mat_prop = {
-    'ele1': {'index': 0, 'E': 2000000, 'A': 2},
-    'ele2': {'index': 1, 'E': 2000000, 'A': 2},
-    'ele3': {'index': 2, 'E': 2000000, 'A': 1},
-    'ele4': {'index': 3, 'E': 2000000, 'A': 1}
+    'ele1': {'E': 2000000, 'A': 2},
+    'ele2': {'E': 2000000, 'A': 2},
+    'ele3': {'E': 2000000, 'A': 1},
+    'ele4': {'E': 2000000, 'A': 1},
 }
 
 nodal_coords = {
-    'node1': {'index': 0, 'x': 0, 'y': 0, 'z': 0},
-    'node2': {'index': 1, 'x': 100, 'y': 0, 'z': 0},
-    'node3': {'index': 2, 'x': 50, 'y': 50, 'z': 0},
-    'node4': {'index': 3, 'x': 200, 'y': 100, 'z': 0}
+    'node1': {'x': 0, 'y': 0, 'z': 0},
+    'node2': {'x': 100, 'y': 0, 'z': 0},
+    'node3': {'x': 50, 'y': 50, 'z': 0},
+    'node4': {'x': 200, 'y': 100, 'z': 0},
 }
 
 connectivity = {
-    'ele1': {'index': 0, 'i': 'node1', 'j': 'node3'},
-    'ele2': {'index': 1, 'i': 'node3', 'j': 'node2'},
-    'ele3': {'index': 2, 'i': 'node3', 'j': 'node4'},
-    'ele4': {'index': 3, 'i': 'node2', 'j': 'node4'}
+    'ele1': {'i': 'node1', 'j': 'node3'},
+    'ele2': {'i': 'node3', 'j': 'node2'},
+    'ele3': {'i': 'node3', 'j': 'node4'},
+    'ele4': {'i': 'node2', 'j': 'node4'},
 }
 
-force_vector = {
-    'node4': {
-        'index': 3,
-        'forces': {
-            'u1': {'index': 0, 'value': 0},
-            'u2': {'index': 1, 'value': -1000},
-            'u3': {'index': 2, 'value': 0}
-        }
-    }
-}
+force_vector = [
+    {'node': 'node4', 'u1': 0, 'u2': -1000, 'u3': 0},
+]
 
-boundary_conditions = {
-    'node1': {
-        'index': 0,
-        'bc': {
-            'u1': {'index': 0, 'value': 0},
-            'u2': {'index': 1, 'value': 0},
-            'u3': {'index': 2, 'value': 0}
-        }
-    },
-    'node2': {
-        'index': 1,
-        'bc': {
-            'u1': {'index': 0, 'value': 0},
-            'u2': {'index': 1, 'value': 0},
-            'u3': {'index': 2, 'value': 0}
-        }
-    },
-    'node3': {
-        'index': 2,
-        'bc': {
-            'u3': {'index': 2, 'value': 0}
-        }
-    },
-    'node4': {
-        'index': 3,
-        'bc': {
-            'u3': {'index': 2, 'value': 0}
-        }
-    }
-}
+boundary_conditions = [
+    {'node': 'node1', 'u1': True, 'u2': True, 'u3': True},
+    {'node': 'node2', 'u1': True, 'u2': True, 'u3': True},
+    {'node': 'node3', 'u1': False, 'u2': False, 'u3': True},
+    {'node': 'node4', 'u1': False, 'u2': False, 'u3': True},
+]
 
 t = Truss(
     mat_prop,
@@ -75,10 +44,10 @@ t = Truss(
 
 def test_truss_creation():
     assert t.nodal_coords == {
-        'node1': {'index': 0, 'x': 0, 'y': 0, 'z': 0},
-        'node2': {'index': 1, 'x': 100, 'y': 0, 'z': 0},
-        'node3': {'index': 2, 'x': 50, 'y': 50, 'z': 0},
-        'node4': {'index': 3, 'x': 200, 'y': 100, 'z': 0}
+        'node1': {'x': 0, 'y': 0, 'z': 0},
+        'node2': {'x': 100, 'y': 0, 'z': 0},
+        'node3': {'x': 50, 'y': 50, 'z': 0},
+        'node4': {'x': 200, 'y': 100, 'z': 0}
     }
 
 
@@ -96,7 +65,7 @@ def test_truss_create_elements():
         [     0,      0,  0,      0,      0, 0],
         [-28284, -28284 ,  0,  28284,  28284, 0],
         [-28284, -28284,  0,  28284,  28284, 0],
-        [     0,      0,  0,      0,      0, 0]
+        [     0,      0,  0,      0,      0, 0],
     ])).all()
 
 
@@ -160,10 +129,10 @@ def test_calculate_deformed_nodal_coords():
             }
             for key in t.deformed_nodal_coords
     } == {
-        'node1': {'index': 0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
-        'node2': {'index': 1, 'x': 100.0, 'y': 0.0, 'z': 0.0},
-        'node3': {'index': 2, 'x': 50.0265, 'y': 50.0088, 'z': 0.0},
-        'node4': {'index': 3, 'x': 200.3479, 'y': 99.4400, 'z': 0.0}
+        'node1': {'x': 0.0, 'y': 0.0, 'z': 0.0},
+        'node2': {'x': 100.0, 'y': 0.0, 'z': 0.0},
+        'node3': {'x': 50.0265, 'y': 50.0088, 'z': 0.0},
+        'node4': {'x': 200.3479, 'y': 99.4400, 'z': 0.0}
     }
 
 
@@ -187,8 +156,8 @@ def test_solve_truss():
             }
             for key in t2.deformed_nodal_coords
     } == {
-        'node1': {'index': 0, 'x': 0.0, 'y': 0.0, 'z': 0.0},
-        'node2': {'index': 1, 'x': 100.0, 'y': 0.0, 'z': 0.0},
-        'node3': {'index': 2, 'x': 50.0265, 'y': 50.0088, 'z': 0.0},
-        'node4': {'index': 3, 'x': 200.3479, 'y': 99.4400, 'z': 0.0}
+        'node1': {'x': 0.0, 'y': 0.0, 'z': 0.0},
+        'node2': {'x': 100.0, 'y': 0.0, 'z': 0.0},
+        'node3': {'x': 50.0265, 'y': 50.0088, 'z': 0.0},
+        'node4': {'x': 200.3479, 'y': 99.4400, 'z': 0.0}
     }

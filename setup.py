@@ -11,5 +11,6 @@ setup(
         'numpy==1.19.2',
         'requests==2.25.0',
         'gunicorn==20.0.4',
+        'rich==9.4.0',
     ],
 )
