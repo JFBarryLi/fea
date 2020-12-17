@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 from typing import List, Optional
 
 from fea.truss.truss import Truss
@@ -59,6 +59,46 @@ class TrussData(BaseModel):
             "example": TrussExampleInput
         }
 
+    @validator('matProp')
+    def validate_unique_mat_prop_id(cls, v):
+        if check_for_unique_key(v, 'ele'):
+            return v
+        else:
+            raise ValueError('Key must be unique.')
+
+    @validator('nodalCoords')
+    def validate_unique_nodal_coords_id(cls, v):
+        if check_for_unique_key(v, 'id'):
+            return v
+        else:
+            raise ValueError('Key must be unique.')
+
+    @validator('connectivity')
+    def validate_unique_connectivity_id(cls, v):
+        if check_for_unique_key(v, 'id'):
+            return v
+        else:
+            raise ValueError('Key must be unique.')
+
+    @validator('boundaryConditions')
+    def validate_unique_boundary_conditions_id(cls, v):
+        if check_for_unique_key(v, 'node'):
+            return v
+        else:
+            raise ValueError('Key must be unique.')
+
+    @validator('stresses')
+    def validate_unique_stresses_id(cls, v):
+        if check_for_unique_key(v, 'ele'):
+            return v
+        else:
+            raise ValueError('Key must be unique.')
+
+
+def check_for_unique_key(list, key):
+    key_list = [dict(item)[key] for item in list]
+    return len(set(key_list)) == len(key_list)
+
 
 @router.get('/')
 def truss_root():
@@ -72,11 +112,8 @@ def truss_solve(truss: TrussData):
     mat_prop = convert_to_dict(truss_dict['matProp'], 'ele')
     nodal_coords = convert_to_dict(truss_dict['nodalCoords'], 'id')
     connectivity = convert_to_dict(truss_dict['connectivity'], 'id')
-    force_vector = convert_to_dict(truss_dict['forceVector'], 'node')
-    boundary_conditions = convert_to_dict(
-        truss_dict['boundaryConditions'],
-        'node'
-    )
+    force_vector = truss_dict['forceVector']
+    boundary_conditions = truss_dict['boundaryConditions']
 
     t = Truss(
         mat_prop,
@@ -91,9 +128,10 @@ def truss_solve(truss: TrussData):
     truss.matProp = convert_to_list(t.mat_prop, 'ele')
     truss.nodalCoords = convert_to_list(t.deformed_nodal_coords, 'id')
     truss.connectivity = convert_to_list(t.connectivity, 'id')
-    truss.forceVector = convert_to_list(t.force_vector, 'node')
-    truss.boundaryConditions = convert_to_list(t.boundary_conditions, 'node')
+    truss.forceVector = t.force_vector
+    truss.boundaryConditions = t.boundary_conditions
     truss.stresses = [{'ele': s, 'vm': t.stresses[s]} for s in t.stresses]
+
     return truss
 
 
@@ -111,3 +149,5 @@ def convert_to_list(dict, key):
         new_dict = {i: dict[k][i] for i in dict[k]}
         new_dict[key] = k
         list.append(new_dict)
+
+    return list

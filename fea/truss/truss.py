@@ -190,9 +190,9 @@ class Truss():
         forces = np.zeros([size, 1])
         for f in self.force_vector:
             node_index = self.nodes[f['node']].index
-            forces[DOF*node_index + 0] = f['u1']
-            forces[DOF*node_index + 1] = f['u2']
-            forces[DOF*node_index + 2] = f['u3']
+            forces[DOF*node_index + 0] += f['u1']
+            forces[DOF*node_index + 1] += f['u2']
+            forces[DOF*node_index + 2] += f['u3']
 
         K_reduced = np.delete(self.K, constraints, axis=0)
         K_reduced = np.delete(K_reduced, constraints, axis=1)
