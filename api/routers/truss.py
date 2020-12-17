@@ -1,7 +1,7 @@
 import logging
 
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, validator, Field
 from typing import List, Optional
 
 from fea.truss.truss import Truss
@@ -13,50 +13,52 @@ router = APIRouter()
 
 
 class MatProp(BaseModel):
-    ele: str
-    E: float
-    A: float
+    ele: str = Field(title='Element')
+    E: float = Field(title="Young's Modulus")
+    A: float = Field(title='Cross Sectional Area')
 
 
 class Node(BaseModel):
-    id: str
-    x: float
-    y: float
-    z: float
+    id: str = Field(title='Node Id')
+    x: float = Field(title='x coord')
+    y: float = Field(title='y coord')
+    z: float = Field(title='z coord')
 
 
 class Connect(BaseModel):
-    id: str
-    i: str
-    j: str
+    id: str = Field(title='Element Id')
+    i: str = Field(title='Node i')
+    j: str = Field(title='Node j')
 
 
 class ForceVector(BaseModel):
-    node: str
-    u1: float
-    u2: float
-    u3: float
+    node: str = Field(title='Node')
+    u1: float = Field(title='Fx')
+    u2: float = Field(title='Fy')
+    u3: float = Field(title='Fz')
 
 
 class BoundaryCondition(BaseModel):
-    node: str
-    u1: bool
-    u2: bool
-    u3: bool
+    node: str = Field(title='Node')
+    u1: bool = Field(title='x constraint')
+    u2: bool = Field(title='y constraint')
+    u3: bool = Field(title='z constraint')
 
 
 class Stress(BaseModel):
-    ele: str
-    vm: float
+    ele: str = Field(title='Element')
+    vm: float = Field(title='Von Mises Stress')
 
 
 class TrussData(BaseModel):
-    matProp: List[MatProp]
-    nodalCoords: List[Node]
-    connectivity: List[Connect]
-    forceVector: List[ForceVector]
-    boundaryConditions: List[BoundaryCondition]
-    stresses: Optional[List[Stress]] = None
+    matProp: List[MatProp] = Field(title='Material Property')
+    nodalCoords: List[Node] = Field(title='Nodal Coordinates')
+    connectivity: List[Connect] = Field(title='Element Connectivity')
+    forceVector: List[ForceVector] = Field(title='Force Vector')
+    boundaryConditions: List[BoundaryCondition] = Field(
+        title='Boundary Conditions'
+    )
+    stresses: Optional[List[Stress]] = Field(None, title='Stresses')
 
     class Config:
         schema_extra = {
