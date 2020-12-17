@@ -1,9 +1,13 @@
-from fastapi import APIRouter
+import logging
+
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, validator
 from typing import List, Optional
 
 from fea.truss.truss import Truss
 from .truss_example import TrussExampleInput
+
+log = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -115,15 +119,22 @@ def truss_solve(truss: TrussData):
     force_vector = truss_dict['forceVector']
     boundary_conditions = truss_dict['boundaryConditions']
 
-    t = Truss(
-        mat_prop,
-        nodal_coords,
-        connectivity,
-        force_vector,
-        boundary_conditions
-    )
+    try:
+        t = Truss(
+            mat_prop,
+            nodal_coords,
+            connectivity,
+            force_vector,
+            boundary_conditions
+        )
 
-    t.solve_truss()
+        t.solve_truss()
+    except Exception as e:
+        log.error({e})
+        raise HTTPException(
+            status_code=500,
+            detail=f'Error: {type(e)} - {e}',
+        )
 
     truss.matProp = convert_to_list(t.mat_prop, 'ele')
     truss.nodalCoords = convert_to_list(t.deformed_nodal_coords, 'id')
