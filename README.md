@@ -5,11 +5,6 @@ fea-app is a Python package aimed to use finite element analysis to solve physic
 Currently implemented solvers are:
 - Truss
 
-Solvers that are on the immediate todo:
-- Frame
-- Plate
-- 3D Elements
-
 ## Installation
 
 ```shell
@@ -33,44 +28,36 @@ pip install -r requirements.txt
 from fea.truss.truss import Truss
 
 mat_prop = {
-    'ele1': {'index': 0, 'E': 2000000, 'A': 2},
+    'ele1': {'E': 2000000, 'A': 2},
+    'ele2': {'E': 2000000, 'A': 2},
+    'ele3': {'E': 2000000, 'A': 1},
+    'ele4': {'E': 2000000, 'A': 1},
 }
 
 nodal_coords = {
-    'node1': {'index': 0, 'x': 0, 'y': 0, 'z': 0},
-    'node2': {'index': 1, 'x': 0, 'y': 100, 'z': 0},
+    'node1': {'x': 0, 'y': 0, 'z': 0},
+    'node2': {'x': 100, 'y': 0, 'z': 0},
+    'node3': {'x': 50, 'y': 50, 'z': 0},
+    'node4': {'x': 200, 'y': 100, 'z': 0},
 }
 
 connectivity = {
-    'ele1': {'index': 0, 'i': 'node1', 'j': 'node2'},
+    'ele1': {'i': 'node1', 'j': 'node3'},
+    'ele2': {'i': 'node3', 'j': 'node2'},
+    'ele3': {'i': 'node3', 'j': 'node4'},
+    'ele4': {'i': 'node2', 'j': 'node4'},
 }
 
-force_vector = {
-    'node2': {
-        'index': 1,
-        'forces': {
-            'u2': {'index': 1, 'value': -10000},
-        }
-    }
-}
+force_vector = [
+    {'node': 'node4', 'u1': 0, 'u2': -1000, 'u3': 0},
+]
 
-boundary_conditions = {
-    'node1': {
-        'index': 0,
-        'bc': {
-            'u1': {'index': 0, 'value': 0},
-            'u2': {'index': 1, 'value': 0},
-            'u3': {'index': 2, 'value': 0},
-        }
-    },
-    'node2': {
-        'index': 1,
-        'bc': {
-            'u1': {'index': 0, 'value': 0},
-            'u3': {'index': 2, 'value': 0},
-        }
-    },
-}
+boundary_conditions = [
+    {'node': 'node1', 'u1': True, 'u2': True, 'u3': True},
+    {'node': 'node2', 'u1': True, 'u2': True, 'u3': True},
+    {'node': 'node3', 'u1': False, 'u2': False, 'u3': True},
+    {'node': 'node4', 'u1': False, 'u2': False, 'u3': True},
+]
 
 t = Truss(
     mat_prop,
@@ -91,7 +78,16 @@ t.deformed_nodal_coords
 make run-api
 ```
 
-To view api docs open your browser at <a href="http://localhost/docs" class="external-link" target="_blank">http://localhost/docs</a>.
+To view the schema
+
+```Python
+from rich import print
+from api.routers.truss import TrussData
+
+print(TrussData.schema())
+```
+
+To view api docs open your browser at <a href="http://localhost:8000/docs" class="external-link" target="_blank">http://localhost:8000/docs</a>.
 
 ## Build
 

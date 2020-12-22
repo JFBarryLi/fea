@@ -1,6 +1,8 @@
 import logging
+from rich.logging import RichHandler
 
 logging.basicConfig(
-    format='%(asctime)s | %(levelname)s | %(name)s | %(message)s',
-    level=logging.INFO
+    format='%(levelname)s | %(name)s | %(message)s',
+    level=logging.INFO,
+    handlers=[RichHandler(rich_tracebacks=True)],
 )

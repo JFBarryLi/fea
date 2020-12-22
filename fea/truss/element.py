@@ -15,7 +15,7 @@ class Element():
     id : str
         Id for the element.
     index : int
-        Index for the element.
+        Index of the element.
     nodei : Node
         Node object, representing node i.
     nodej : Node
@@ -73,10 +73,10 @@ class Element():
 
         log.debug(f'Calculating element[{self.id}] stiffness matrix.')
         self.K = E * A / L * np.array([
-            [ Cx**2,  Cx*Cy,  Cx*Cz, -Cx**2, -Cx*Cy, -Cx*Cz],
-            [ Cx*Cy,  Cy**2,  Cy*Cz, -Cx*Cy, -Cy**2, -Cy*Cz],
-            [ Cx*Cz,  Cy*Cz,  Cz**2, -Cx*Cz, -Cy*Cz, -Cz**2],
-            [-Cx**2, -Cx*Cy, -Cx*Cz,  Cx**2,  Cx*Cy,  Cx*Cz],
-            [-Cx*Cy, -Cy**2, -Cy*Cz,  Cx*Cy,  Cy**2,  Cy*Cz],
-            [-Cx*Cz, -Cy*Cz, -Cz**2,  Cx*Cz,  Cy*Cz,  Cz**2]
+            [ Cx**2,  Cx*Cy,  Cx*Cz, -Cx**2, -Cx*Cy, -Cx*Cz],  # noqa: E201
+            [ Cx*Cy,  Cy**2,  Cy*Cz, -Cx*Cy, -Cy**2, -Cy*Cz],  # noqa: E201
+            [ Cx*Cz,  Cy*Cz,  Cz**2, -Cx*Cz, -Cy*Cz, -Cz**2],  # noqa: E201
+            [-Cx**2, -Cx*Cy, -Cx*Cz,  Cx**2,  Cx*Cy,  Cx*Cz],  # noqa: E201
+            [-Cx*Cy, -Cy**2, -Cy*Cz,  Cx*Cy,  Cy**2,  Cy*Cz],  # noqa: E201
+            [-Cx*Cz, -Cy*Cz, -Cz**2,  Cx*Cz,  Cy*Cz,  Cz**2],  # noqa: E201
         ])
