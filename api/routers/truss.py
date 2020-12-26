@@ -135,7 +135,7 @@ def truss_solve(truss: TrussData):
         log.error({e})
         raise HTTPException(
             status_code=500,
-            detail=f'Error: {type(e)} - {e}',
+            detail=f'Error: {e}',
         )
 
     truss.matProp = convert_to_list(t.mat_prop, 'ele')
