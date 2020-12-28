@@ -1,23 +1,27 @@
-# fea-app
+[<img alt='barryFEA' src='https://user-images.githubusercontent.com/40674314/103185896-77f37f80-488c-11eb-8dff-30caed3e9723.png'>](https://fea.barryli.ca/)
+
+Finite Element Analysis
 
 fea-app is a Python package aimed to use finite element analysis to solve physical problems.
 
-Currently implemented solvers are:
-- Truss
-
 ## Installation
 
-```shell
+```bash
 pip install git+https://github.com/JFBarryLi/fea-app.git
 ```
 
-### Local Development
+## Local Development
 
-```shell
+```bash
 git clone https://github.com/JFBarryLi/fea-app.git
 python -m venv venv
 . venv/bin/activate
 pip install -r requirements.txt
+```
+
+### Testing
+```bash
+make test
 ```
 
 ## Usage
@@ -94,3 +98,6 @@ To view api docs open your browser at <a href="http://localhost:8000/docs" class
 ```shell
 make build
 ```
+
+## License
+See [LICENSE](./LICENSE) for more information.
