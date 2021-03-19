@@ -1,0 +1,37 @@
+{
+    "requiresCompatibilities": [
+        "FARGATE"
+    ],
+    "inferenceAccelerators": [],
+    "containerDefinitions": [
+      {
+        "entryPoint": [
+          "sh",
+          "-c"
+        ],
+        "portMappings": [
+          {
+            "hostPort": 80,
+            "protocol": "tcp",
+            "containerPort": 80
+          }
+        ],
+        "command": [
+          "/bin/sh -c \"cd /fea-app && gunicorn -w 4 -k uvicorn.workers.UvicornH11Worker api.main:fea_app --bind 0.0.0.0:80\""
+        ],
+        "cpu": 256,
+        "memory": 512,
+        "image": "fea:latest",
+        "name": "fea-app",
+        "essential": true
+      }
+    ],
+    "volumes": [],
+    "networkMode": "awsvpc",
+    "memory": "512",
+    "cpu": "256",
+    "executionRoleArn": "arn:aws:iam::<YOUR_AWS_ACCOUNT_ID>:role/ecs-agent-fea-cluster",
+    "family": "fea-app",
+    "taskRoleArn": "",
+    "placementConstraints": []
+}
