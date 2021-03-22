@@ -1,6 +1,7 @@
 on:
-  release:
-    types: [created]
+  push:
+    branches:
+      - master
 
 name: Deploy to Amazon ECS
 
@@ -43,6 +44,15 @@ jobs:
         task-definition: task-definition.json
         container-name: fea-app
         image: ${{ steps.build-image.outputs.image }}
+
+    - name: Fill in task definition variables
+      id: task-def-substitution
+      uses: microsoft/variable-substitution@v1
+      with:
+        files: ${{ steps.task-def.outputs.task-definition }}
+      env:
+        executionRoleArn: arn:aws:iam::${{secrets.AWS_ACCOUNT_ID}}:role/ecs-agent-fea-cluster
+        taskRoleArn: arn:aws:iam::${{secrets.AWS_ACCOUNT_ID}}:role/ecs-agent-fea-cluster
 
     - name: Deploy Amazon ECS task definition
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1

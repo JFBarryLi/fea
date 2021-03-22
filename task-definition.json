@@ -1,7 +1,5 @@
 {
-    "requiresCompatibilities": [
-        "FARGATE"
-    ],
+    "requiresCompatibilities": [],
     "inferenceAccelerators": [],
     "containerDefinitions": [
       {
@@ -21,7 +19,6 @@
         ],
         "cpu": 256,
         "memory": 512,
-        "image": "fea:latest",
         "name": "fea-app",
         "essential": true
       }
@@ -30,7 +27,7 @@
     "networkMode": "awsvpc",
     "memory": "512",
     "cpu": "256",
-    "executionRoleArn": "arn:aws:iam::<YOUR_AWS_ACCOUNT_ID>:role/ecs-agent-fea-cluster",
+    "executionRoleArn": "",
     "family": "fea-app",
     "taskRoleArn": "",
     "placementConstraints": []
