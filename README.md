@@ -1,3 +1,5 @@
+![CI](https://github.com/JFBarryLi/fea/actions/workflows/ci.yml/badge.svg)
+
 [<img alt='barryFEA' src='https://user-images.githubusercontent.com/40674314/103185896-77f37f80-488c-11eb-8dff-30caed3e9723.png'>](https://fea.barryli.ca/)
 
 Finite Element Analysis
