@@ -11,7 +11,7 @@
           {
             "hostPort": 0,
             "protocol": "tcp",
-            "containerPort": 5900
+            "containerPort": 80
           }
         ],
         "entryPoint": [
