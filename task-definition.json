@@ -15,7 +15,7 @@
           }
         ],
         "entryPoint": [
-          "/usr/bn/dumb-init", "--"
+          "/usr/bin/dumb-init", "--"
         ],
         "command": [
           "/entrypoint.sh"
