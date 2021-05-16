@@ -23,7 +23,15 @@
         "cpu": 256,
         "memory": 512,
         "name": "fea-app",
-        "essential": true
+        "essential": true,
+        "logConfiguration": {
+          "logDriver": "awslogs",
+          "options": {
+            "awslogs-group": "AWSLOGS_GROUP_NAME",
+            "awslogs-region": "AWS_REGION",
+            "awslogs-stream-prefix": "fea-app"
+          }
+        }
       }
     ],
     "volumes": [],
@@ -32,6 +40,6 @@
     "executionRoleArn": "",
     "family": "fea-app",
     "networkMode": "bridge",
-    "taskRoleArn": "",
+    "taskRoleArn": "TASK_ROLE_ARN",
     "placementConstraints": []
 }
