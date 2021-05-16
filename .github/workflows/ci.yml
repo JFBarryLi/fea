@@ -53,9 +53,9 @@ jobs:
         AWSLOGS_GROUP_NAME: ${{ secrets.AWSLOGS_GROUP_NAME }}
         TASK_ROLE_ARN: ${{ secrets.TASK_ROLE_ARN }}
       run: |
-        sed -i "s/AWS_REGION/${AWS_REGION}/g" ${TASK_DEF}
-        sed -i "s/AWSLOGS_GROUP_NAME/${AWSLOGS_GROUP_NAME}/g" ${TASK_DEF}
-        sed -i "s/TASK_ROLE_ARN/${TASK_ROLE_ARN}/g" ${TASK_DEF}
+        sed -i "s|AWS_REGION|${AWS_REGION}|g" ${TASK_DEF}
+        sed -i "s|AWSLOGS_GROUP_NAME|${AWSLOGS_GROUP_NAME}|g" ${TASK_DEF}
+        sed -i "s|TASK_ROLE_ARN|${TASK_ROLE_ARN}|g" ${TASK_DEF}
 
     - name: Deploy Amazon ECS task definition
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
