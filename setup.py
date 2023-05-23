@@ -9,7 +9,7 @@ setup(
         'uvicorn==0.12.2',
         'pytest==6.1.1',
         'numpy==1.19.2',
-        'requests==2.25.0',
+        'requests==2.31.0',
         'gunicorn==20.0.4',
         'rich==9.4.0',
     ],
